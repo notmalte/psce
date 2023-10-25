@@ -1,7 +1,13 @@
 use rand::seq::SliceRandom;
 use rayon::prelude::*;
 
-use crate::{game::Game, piece::Piece, ply::Ply, position::Position, square::Square};
+use crate::{
+    game::Game,
+    piece::Piece,
+    ply::{Ply, PlyKind},
+    position::Position,
+    square::Square,
+};
 
 const CHECKMATE_EVAL: isize = 999_999;
 
@@ -62,6 +68,71 @@ fn evaluate_game(game: &Game) -> isize {
     score
 }
 
+pub fn sort_potential_plies(plies: Vec<Ply>) -> Vec<Ply> {
+    let mut plies = plies;
+
+    plies.sort_by(|a, b| {
+        let a_kind = match a.kind {
+            PlyKind::CastleKingside => 1,
+            PlyKind::CastleQueenside => 2,
+            PlyKind::PromotionCapture { .. } => 3,
+            PlyKind::Promotion { .. } => 4,
+            PlyKind::EnPassant { .. } => 5,
+            PlyKind::Capture { .. } => 6,
+            PlyKind::Regular { .. } => 7,
+        };
+
+        let b_kind = match b.kind {
+            PlyKind::CastleKingside => 1,
+            PlyKind::CastleQueenside => 2,
+            PlyKind::PromotionCapture { .. } => 3,
+            PlyKind::Promotion { .. } => 4,
+            PlyKind::EnPassant { .. } => 5,
+            PlyKind::Capture { .. } => 6,
+            PlyKind::Regular { .. } => 7,
+        };
+
+        if a_kind != b_kind {
+            return a_kind.cmp(&b_kind);
+        }
+
+        let a_is_capture = match a.kind {
+            PlyKind::Capture { .. } | PlyKind::PromotionCapture { .. } => true,
+            _ => false,
+        };
+
+        let b_is_capture = match b.kind {
+            PlyKind::Capture { .. } | PlyKind::PromotionCapture { .. } => true,
+            _ => false,
+        };
+
+        if a_is_capture && b_is_capture {
+            let a_captured = match a.kind {
+                PlyKind::Capture { captured, .. } | PlyKind::PromotionCapture { captured, .. } => {
+                    captured
+                }
+                _ => panic!("Not a capture"),
+            };
+
+            let b_captured = match b.kind {
+                PlyKind::Capture { captured, .. } | PlyKind::PromotionCapture { captured, .. } => {
+                    captured
+                }
+                _ => panic!("Not a capture"),
+            };
+
+            let a_captured_value = piece_value(a_captured);
+            let b_captured_value = piece_value(b_captured);
+
+            return b_captured_value.cmp(&a_captured_value);
+        }
+
+        return std::cmp::Ordering::Equal;
+    });
+
+    plies
+}
+
 fn evaluate_ply_with_depth(
     game: &Game,
     ply: Ply,
@@ -77,12 +148,13 @@ fn evaluate_ply_with_depth(
     }
 
     let opponent_legal_plies = clone.find_legal_plies(clone.color_to_move);
+    let opponent_sorted_legal_plies = sort_potential_plies(opponent_legal_plies);
 
     let mut eval = -CHECKMATE_EVAL;
 
     let mut local_alpha = alpha;
 
-    for opponent_ply in opponent_legal_plies {
+    for opponent_ply in opponent_sorted_legal_plies {
         eval = eval.max(evaluate_ply_with_depth(
             &clone,
             opponent_ply,

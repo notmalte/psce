@@ -17,7 +17,7 @@ mod position;
 mod square;
 
 const PERFT_DEPTH: usize = 6;
-const ENGINE_DEPTH: usize = 6;
+const ENGINE_DEPTH: usize = 5;
 
 fn trusted_input_to_positions(s: String) -> (Position, Position) {
     let (s_from, s_to) = s.split_at(2);
