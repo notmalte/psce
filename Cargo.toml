@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 colored = "2.0.4"
 inquire = "0.6.2"
+rand = "0.8.5"
+rayon = "1.8.0"

@@ -9,12 +9,21 @@ pub struct CastlingRights {
 }
 
 impl CastlingRights {
-    pub fn new() -> Self {
+    pub fn all() -> Self {
         return Self {
             white_kingside: true,
             white_queenside: true,
             black_kingside: true,
             black_queenside: true,
+        };
+    }
+
+    pub fn none() -> Self {
+        return Self {
+            white_kingside: false,
+            white_queenside: false,
+            black_kingside: false,
+            black_queenside: false,
         };
     }
 

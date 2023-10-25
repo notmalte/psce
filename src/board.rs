@@ -114,25 +114,4 @@ impl Board {
     pub fn set_empty(&mut self, position: Position) {
         self.set(position, Square::Empty);
     }
-
-    pub fn print(&self) {
-        for row in 0..=7 {
-            for col in 0..=7 {
-                let light_square = (row + col) % 2 == 0;
-
-                let square = format!(" {} ", self.get(Position::new(row, col)).to_string()).black();
-
-                print!(
-                    "{}",
-                    if light_square {
-                        square.on_truecolor(255, 206, 158)
-                    } else {
-                        square.on_truecolor(209, 139, 71)
-                    }
-                )
-            }
-            print!(" {}\n", 8 - row);
-        }
-        println!(" a  b  c  d  e  f  g  h");
-    }
 }

@@ -13,4 +13,11 @@ impl Square {
             Self::Occupied(c, p) => p.to_character(c),
         }
     }
+
+    pub fn is_empty(self) -> bool {
+        match self {
+            Self::Empty => true,
+            Self::Occupied(_, _) => false,
+        }
+    }
 }
