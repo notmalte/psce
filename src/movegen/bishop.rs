@@ -2,6 +2,7 @@ use crate::{bitboard::rf_to_square_i8, constants::BISHOP_MAGIC_NUMBERS};
 
 use super::mask_occupancy;
 
+#[derive(Clone)]
 pub struct BishopMoveGen {
     candidate_table: [u64; 64],
     relevant_bits_table: [u8; 64],

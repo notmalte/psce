@@ -1,10 +1,8 @@
-use crate::{
-    bitboard::rf_to_square_i8,
-    constants::{BISHOP_MAGIC_NUMBERS, ROOK_MAGIC_NUMBERS},
-};
+use crate::{bitboard::rf_to_square_i8, constants::ROOK_MAGIC_NUMBERS};
 
-use super::{mask_occupancy, occupancy};
+use super::mask_occupancy;
 
+#[derive(Clone)]
 pub struct RookMoveGen {
     candidate_table: [u64; 64],
     relevant_bits_table: [u8; 64],
