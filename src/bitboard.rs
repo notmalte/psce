@@ -1,8 +1,8 @@
 use crate::enums::{Color, PieceAndColor};
 use std::fmt::Display;
 
-pub fn get_bit(bitboard: u64, square: u8) -> u64 {
-    bitboard & (1u64 << square)
+pub fn get_bit(bitboard: u64, square: u8) -> bool {
+    bitboard & (1u64 << square) != 0
 }
 
 pub fn set_bit(bitboard: &mut u64, square: u8) {
@@ -26,7 +26,7 @@ pub fn square_to_string(square: u8) -> Result<String, String> {
         Ok(format!(
             "{}{}",
             (b'a' + (square % 8)) as char,
-            (b'1' + (square / 8)) as char
+            (b'1' + (7 - (square / 8))) as char
         ))
     } else {
         Err("Square out of bounds".to_string())
@@ -43,7 +43,7 @@ pub fn string_to_square(string: String) -> Result<u8, String> {
         let rank = chars[1];
 
         if ('a'..='h').contains(&file) && ('1'..='8').contains(&rank) {
-            Ok(rf_to_square((rank as u8) - b'1', (file as u8) - b'a'))
+            Ok(rf_to_square(7 - ((rank as u8) - b'1'), (file as u8) - b'a'))
         } else {
             Err(format!("Invalid square: {}", string))
         }
@@ -61,14 +61,7 @@ pub fn print_bitboard(bitboard: u64) {
         for file in 0..8 {
             let square = rf_to_square(rank, file);
 
-            print!(
-                "{}",
-                if get_bit(bitboard, square) != 0 {
-                    "██"
-                } else {
-                    "  "
-                }
-            );
+            print!(" {}", if get_bit(bitboard, square) { "1" } else { "0" });
         }
 
         println!();
@@ -79,6 +72,7 @@ pub fn print_bitboard(bitboard: u64) {
     println!("Bitboard: {}\n", bitboard)
 }
 
+#[derive(Clone)]
 pub struct BitboardContainer {
     pieces: [u64; 12],
     colors: [u64; 3],
@@ -100,7 +94,7 @@ impl BitboardContainer {
         &mut self.pieces[piece as usize]
     }
 
-    pub fn piece_get_bit(&self, piece: PieceAndColor, square: u8) -> u64 {
+    pub fn piece_get_bit(&self, piece: PieceAndColor, square: u8) -> bool {
         get_bit(self.pieces[piece as usize], square)
     }
 
@@ -120,7 +114,7 @@ impl BitboardContainer {
         &mut self.colors[color as usize]
     }
 
-    pub fn color_get_bit(&self, color: Color, square: u8) -> u64 {
+    pub fn color_get_bit(&self, color: Color, square: u8) -> bool {
         get_bit(self.colors[color as usize], square)
     }
 
@@ -130,6 +124,21 @@ impl BitboardContainer {
 
     pub fn color_clear_bit(&mut self, color: Color, square: u8) {
         clear_bit(&mut self.colors[color as usize], square)
+    }
+
+    pub fn piece_set_bit_incl_color(&mut self, piece: PieceAndColor, square: u8) {
+        self.piece_set_bit(piece, square);
+        self.color_set_bit(piece.color(), square);
+    }
+
+    pub fn piece_clear_bit_incl_color(&mut self, piece: PieceAndColor, square: u8) {
+        self.piece_clear_bit(piece, square);
+        self.color_clear_bit(piece.color(), square);
+    }
+
+    pub fn compute_both(&mut self) {
+        self.colors[Color::Both as usize] =
+            self.colors[Color::White as usize] | self.colors[Color::Black as usize];
     }
 }
 
@@ -144,7 +153,7 @@ impl Display for BitboardContainer {
                 let mut piece_opt: Option<PieceAndColor> = None;
 
                 for (piece_index, piece_bitboard) in self.pieces.iter().enumerate() {
-                    if get_bit(*piece_bitboard, square) != 0 {
+                    if get_bit(*piece_bitboard, square) {
                         piece_opt = Some(PieceAndColor::from_repr(piece_index).unwrap());
                         break;
                     }

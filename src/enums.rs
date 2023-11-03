@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, ops::Not};
 use strum::{Display, EnumIter, FromRepr};
 
 #[derive(Clone, Copy, PartialEq, Display)]
@@ -6,6 +6,18 @@ pub enum Color {
     White,
     Black,
     Both,
+}
+
+impl Not for Color {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        match self {
+            Self::White => Self::Black,
+            Self::Black => Self::White,
+            Self::Both => Self::Both,
+        }
+    }
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -76,7 +88,7 @@ impl CastlingRights {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, EnumIter, FromRepr)]
+#[derive(Clone, Copy, PartialEq, FromRepr, EnumIter)]
 pub enum PieceAndColor {
     WhitePawn,
     WhiteKnight,
@@ -93,6 +105,24 @@ pub enum PieceAndColor {
 }
 
 impl PieceAndColor {
+    pub const WHITE_PIECES: [Self; 6] = [
+        Self::WhitePawn,
+        Self::WhiteKnight,
+        Self::WhiteBishop,
+        Self::WhiteRook,
+        Self::WhiteQueen,
+        Self::WhiteKing,
+    ];
+
+    pub const BLACK_PIECES: [Self; 6] = [
+        Self::BlackPawn,
+        Self::BlackKnight,
+        Self::BlackBishop,
+        Self::BlackRook,
+        Self::BlackQueen,
+        Self::BlackKing,
+    ];
+
     pub fn from_char(c: char) -> Result<Self, String> {
         match c {
             'P' => Ok(Self::WhitePawn),
