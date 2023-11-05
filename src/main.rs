@@ -18,7 +18,7 @@ mod search;
 const SEARCH_DEPTH: usize = 6;
 
 fn print_uci_id_and_ok() {
-    println!("id name Pretty Solid Chess");
+    println!("id name Pretty Solid Chess Engine");
     println!("id author notmalte");
     println!("uciok");
 }

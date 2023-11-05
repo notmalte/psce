@@ -1,1 +1,3 @@
-# Chess Engine - WIP
+# Pretty Solid Chess Engine
+
+Work in progress.
