@@ -174,6 +174,17 @@ impl PieceAndColor {
             | Self::BlackKing => Color::Black,
         }
     }
+
+    pub fn value_for_ordering(&self) -> u8 {
+        match self {
+            Self::WhitePawn | Self::BlackPawn => 1,
+            Self::WhiteKnight | Self::BlackKnight => 2,
+            Self::WhiteBishop | Self::BlackBishop => 3,
+            Self::WhiteRook | Self::BlackRook => 4,
+            Self::WhiteQueen | Self::BlackQueen => 5,
+            Self::WhiteKing | Self::BlackKing => 6,
+        }
+    }
 }
 
 impl Display for PieceAndColor {

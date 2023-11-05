@@ -68,7 +68,7 @@ impl Move {
         s
     }
 
-    pub fn to_pretty_print(&self) -> String {
+    pub fn to_pretty_string(&self) -> String {
         let mut s = square_to_string(self.source_square).unwrap();
         s.push_str(&square_to_string(self.target_square).unwrap());
 
@@ -93,6 +93,22 @@ impl Move {
         }
 
         s
+    }
+
+    pub fn get_victim_piece(&self, position: &Position) -> Option<PieceAndColor> {
+        if self.is_en_passant {
+            if self.piece == PieceAndColor::WhitePawn {
+                return Some(PieceAndColor::BlackPawn);
+            } else {
+                return Some(PieceAndColor::WhitePawn);
+            }
+        }
+
+        if self.is_capture {
+            return position.piece_on_square(self.target_square);
+        }
+
+        None
     }
 }
 
@@ -284,7 +300,7 @@ impl MoveGen {
         println!("\n   a b c d e f g h");
     }
 
-    pub fn generate_pseudo_legal_moves(&self, position: &Position) -> Vec<Move> {
+    fn generate_pseudo_legal_moves(&self, position: &Position) -> Vec<Move> {
         if position.color_to_move() == Color::Both {
             unreachable!();
         }
@@ -301,7 +317,7 @@ impl MoveGen {
         moves
     }
 
-    pub fn generate_legal_moves(&self, position: &Position) -> Vec<Move> {
+    pub fn generate_legal_moves(&self, position: &Position) -> Vec<(Move, Position)> {
         let mut moves = Vec::new();
 
         let pseudo_legal_moves = self.generate_pseudo_legal_moves(position);
@@ -309,8 +325,8 @@ impl MoveGen {
         for pseudo_legal_move in pseudo_legal_moves {
             let opt = position.make_move(self, &pseudo_legal_move, false);
 
-            if opt.is_some() {
-                moves.push(pseudo_legal_move);
+            if let Some(new_position) = opt {
+                moves.push((pseudo_legal_move, new_position));
             }
         }
 
@@ -320,12 +336,45 @@ impl MoveGen {
     pub fn parse_uci_move(&self, position: &Position, move_str: String) -> Option<Move> {
         let legal_moves = self.generate_legal_moves(position);
 
-        for legal_move in legal_moves {
+        for (legal_move, _) in legal_moves {
             if legal_move.to_uci().to_ascii_lowercase() == move_str.to_ascii_lowercase() {
                 return Some(legal_move);
             }
         }
 
         None
+    }
+
+    pub fn generate_legal_moves_sorted(&self, position: &Position) -> Vec<(Move, Position)> {
+        let mut moves = self.generate_legal_moves(position);
+
+        moves.sort_by(
+            |(a_move, _), (b_move, _)| match (a_move.is_capture, b_move.is_capture) {
+                (true, false) => std::cmp::Ordering::Less,
+                (false, true) => std::cmp::Ordering::Greater,
+                (false, false) => std::cmp::Ordering::Equal,
+                (true, true) => {
+                    let a_victim_value = a_move
+                        .get_victim_piece(position)
+                        .unwrap()
+                        .value_for_ordering();
+                    let b_victim_value = b_move
+                        .get_victim_piece(position)
+                        .unwrap()
+                        .value_for_ordering();
+
+                    if a_victim_value != b_victim_value {
+                        return b_victim_value.cmp(&a_victim_value);
+                    }
+
+                    let a_piece_value = a_move.piece.value_for_ordering();
+                    let b_piece_value = b_move.piece.value_for_ordering();
+
+                    a_piece_value.cmp(&b_piece_value)
+                }
+            },
+        );
+
+        moves
     }
 }

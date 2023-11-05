@@ -7,14 +7,10 @@ pub fn count_nodes(move_gen: &MoveGen, position: &Position, depth: usize) -> usi
 
     let mut nodes = 0;
 
-    let moves = move_gen.generate_pseudo_legal_moves(position);
+    let moves = move_gen.generate_legal_moves(position);
 
-    for m in moves {
-        let new_pos_opt = position.make_move(move_gen, &m, false);
-
-        if let Some(new_pos) = new_pos_opt {
-            nodes += count_nodes(move_gen, &new_pos, depth - 1);
-        }
+    for (_, new_position) in moves {
+        nodes += count_nodes(move_gen, &new_position, depth - 1);
     }
 
     nodes
@@ -27,18 +23,14 @@ pub fn run_perft(move_gen: &MoveGen, position: &Position, depth: usize) {
 
     let mut total = 0;
 
-    let moves = move_gen.generate_pseudo_legal_moves(position);
+    let moves = move_gen.generate_legal_moves(position);
 
-    for m in moves {
-        let new_pos_opt = position.make_move(move_gen, &m, false);
+    for (legal_move, new_position) in moves {
+        let nodes = count_nodes(move_gen, &new_position, depth - 1);
 
-        if let Some(new_pos) = new_pos_opt {
-            let nodes = count_nodes(move_gen, &new_pos, depth - 1);
+        total += nodes;
 
-            total += nodes;
-
-            println!("{}: {}", m, nodes);
-        }
+        println!("{}: {}", legal_move, nodes);
     }
 
     let t_end = std::time::Instant::now();

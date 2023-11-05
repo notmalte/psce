@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use strum::IntoEnumIterator;
+
 use crate::{
     bitboard::{rf_to_square, square_to_string, string_to_square, BitboardContainer},
     constants::{A1, A8, C1, C8, D1, D8, E1, E8, F1, F8, G1, G8, H1, H8},
@@ -60,11 +62,6 @@ impl Position {
         &mut self.castling_rights
     }
 
-    // empty    "8/8/8/8/8/8/8/8 w - - "
-    // initial  "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    // tricky   "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"
-    // killer   "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1"
-    // cmk      "r2q1rk1/ppp2ppp/2n1bn2/2b1p3/3pP3/3P1NPP/PPP1NPB1/R1BQ1RK1 b - - 0 9"
     pub fn from_fen(fen: String) -> Result<Self, String> {
         let mut position = Self::empty();
 
@@ -253,17 +250,6 @@ impl Position {
         Some(clone)
     }
 
-    // // init start position
-    // position startpos
-
-    // // init start position and make the moves on chess board
-    // position startpos moves e2e4 e7e5
-
-    // // init position from FEN string
-    // position fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1
-
-    // // init position from fen string and make moves on chess board
-    // position fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1 moves e2a6 e8g8
     pub fn from_uci(move_gen: &MoveGen, command: String) -> Option<Self> {
         let command_parts: Vec<_> = command.split_whitespace().collect();
 
@@ -324,6 +310,16 @@ impl Position {
                 }
 
                 return Some(position_result.unwrap());
+            }
+        }
+
+        None
+    }
+
+    pub fn piece_on_square(&self, square: u8) -> Option<PieceAndColor> {
+        for piece in PieceAndColor::iter() {
+            if self.bitboards.piece_get_bit(piece, square) {
+                return Some(piece);
             }
         }
 
