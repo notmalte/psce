@@ -159,16 +159,20 @@ fn quiescence(
 
     alpha = alpha.max(eval);
 
-    let moves = move_gen.generate_legal_moves_sorted(position);
+    let pseudo_moves = move_gen.generate_pseudo_legal_moves_sorted(position);
 
-    for (_, new_position) in moves {
-        let eval = -quiescence(move_gen, &new_position, -beta, -alpha, ply + 1);
+    for pseudo_move in pseudo_moves {
+        let new_position_opt = position.make_move(move_gen, &pseudo_move, true);
 
-        if eval >= beta {
-            return beta;
+        if let Some(new_position) = new_position_opt {
+            let eval = -quiescence(move_gen, &new_position, -beta, -alpha, ply + 1);
+
+            if eval >= beta {
+                return beta;
+            }
+
+            alpha = alpha.max(eval);
         }
-
-        alpha = alpha.max(eval);
     }
 
     alpha
@@ -186,9 +190,27 @@ fn negamax(
         return quiescence(move_gen, position, alpha, beta, ply);
     }
 
-    let moves = move_gen.generate_legal_moves_sorted(position);
+    let pseudo_moves = move_gen.generate_pseudo_legal_moves_sorted(position);
 
-    if moves.is_empty() {
+    let mut can_move = false;
+
+    for pseudo_move in pseudo_moves {
+        let new_position_opt = position.make_move(move_gen, &pseudo_move, false);
+
+        if let Some(new_position) = new_position_opt {
+            can_move = true;
+
+            let eval = -negamax(move_gen, &new_position, depth - 1, -beta, -alpha, ply + 1);
+
+            if eval >= beta {
+                return beta;
+            }
+
+            alpha = alpha.max(eval);
+        }
+    }
+
+    if !can_move {
         let king_piece = match position.color_to_move() {
             Color::White => PieceAndColor::WhiteKing,
             Color::Black => PieceAndColor::BlackKing,
@@ -207,38 +229,32 @@ fn negamax(
         }
     }
 
-    for (_, new_position) in moves {
-        let eval = -negamax(move_gen, &new_position, depth - 1, -beta, -alpha, ply + 1);
-
-        if eval >= beta {
-            return beta;
-        }
-
-        alpha = alpha.max(eval);
-    }
-
     alpha
 }
 
 pub fn search(move_gen: &MoveGen, position: &Position, depth: usize) -> (isize, Option<Move>) {
-    let moves = move_gen.generate_legal_moves_sorted(position);
+    let pseudo_moves = move_gen.generate_pseudo_legal_moves_sorted(position);
 
     let mut best_eval = STARTING_EVAL;
     let mut best_move = None;
 
-    for (legal_move, new_position) in moves {
-        let eval = -negamax(
-            move_gen,
-            &new_position,
-            depth - 1,
-            best_eval,
-            -STARTING_EVAL,
-            0,
-        );
+    for pseudo_move in pseudo_moves {
+        let new_position_opt = position.make_move(move_gen, &pseudo_move, false);
 
-        if eval > best_eval {
-            best_eval = eval;
-            best_move = Some(legal_move);
+        if let Some(new_position) = new_position_opt {
+            let eval = -negamax(
+                move_gen,
+                &new_position,
+                depth - 1,
+                best_eval,
+                -STARTING_EVAL,
+                0,
+            );
+
+            if eval > best_eval {
+                best_eval = eval;
+                best_move = Some(pseudo_move);
+            }
         }
     }
 

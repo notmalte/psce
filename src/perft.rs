@@ -7,7 +7,7 @@ pub fn count_nodes(move_gen: &MoveGen, position: &Position, depth: usize) -> usi
 
     let mut nodes = 0;
 
-    let moves = move_gen.generate_legal_moves(position);
+    let moves = move_gen.generate_legal_moves_expensive(position);
 
     for (_, new_position) in moves {
         nodes += count_nodes(move_gen, &new_position, depth - 1);
@@ -23,7 +23,7 @@ pub fn run_perft(move_gen: &MoveGen, position: &Position, depth: usize) {
 
     let mut total = 0;
 
-    let moves = move_gen.generate_legal_moves(position);
+    let moves = move_gen.generate_legal_moves_expensive(position);
 
     for (legal_move, new_position) in moves {
         let nodes = count_nodes(move_gen, &new_position, depth - 1);

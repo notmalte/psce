@@ -300,7 +300,7 @@ impl MoveGen {
         println!("\n   a b c d e f g h");
     }
 
-    fn generate_pseudo_legal_moves(&self, position: &Position) -> Vec<Move> {
+    pub fn generate_pseudo_legal_moves(&self, position: &Position) -> Vec<Move> {
         if position.color_to_move() == Color::Both {
             unreachable!();
         }
@@ -317,39 +317,11 @@ impl MoveGen {
         moves
     }
 
-    pub fn generate_legal_moves(&self, position: &Position) -> Vec<(Move, Position)> {
-        let mut moves = Vec::new();
-
-        let pseudo_legal_moves = self.generate_pseudo_legal_moves(position);
-
-        for pseudo_legal_move in pseudo_legal_moves {
-            let opt = position.make_move(self, &pseudo_legal_move, false);
-
-            if let Some(new_position) = opt {
-                moves.push((pseudo_legal_move, new_position));
-            }
-        }
-
-        moves
-    }
-
-    pub fn parse_uci_move(&self, position: &Position, move_str: String) -> Option<Move> {
-        let legal_moves = self.generate_legal_moves(position);
-
-        for (legal_move, _) in legal_moves {
-            if legal_move.to_uci().to_ascii_lowercase() == move_str.to_ascii_lowercase() {
-                return Some(legal_move);
-            }
-        }
-
-        None
-    }
-
-    pub fn generate_legal_moves_sorted(&self, position: &Position) -> Vec<(Move, Position)> {
-        let mut moves = self.generate_legal_moves(position);
+    pub fn generate_pseudo_legal_moves_sorted(&self, position: &Position) -> Vec<Move> {
+        let mut moves = self.generate_pseudo_legal_moves(position);
 
         moves.sort_by(
-            |(a_move, _), (b_move, _)| match (a_move.is_capture, b_move.is_capture) {
+            |a_move, b_move| match (a_move.is_capture, b_move.is_capture) {
                 (true, false) => std::cmp::Ordering::Less,
                 (false, true) => std::cmp::Ordering::Greater,
                 (false, false) => std::cmp::Ordering::Equal,
@@ -376,5 +348,33 @@ impl MoveGen {
         );
 
         moves
+    }
+
+    pub fn generate_legal_moves_expensive(&self, position: &Position) -> Vec<(Move, Position)> {
+        let mut moves = Vec::new();
+
+        let pseudo_legal_moves = self.generate_pseudo_legal_moves(position);
+
+        for pseudo_legal_move in pseudo_legal_moves {
+            let opt = position.make_move(self, &pseudo_legal_move, false);
+
+            if let Some(new_position) = opt {
+                moves.push((pseudo_legal_move, new_position));
+            }
+        }
+
+        moves
+    }
+
+    pub fn parse_uci_move(&self, position: &Position, move_str: String) -> Option<Move> {
+        let legal_moves = self.generate_legal_moves_expensive(position);
+
+        for (legal_move, _) in legal_moves {
+            if legal_move.to_uci().to_ascii_lowercase() == move_str.to_ascii_lowercase() {
+                return Some(legal_move);
+            }
+        }
+
+        None
     }
 }

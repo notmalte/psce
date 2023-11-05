@@ -15,7 +15,7 @@ mod perft;
 mod position;
 mod search;
 
-const SEARCH_DEPTH: usize = 4;
+const SEARCH_DEPTH: usize = 6;
 
 fn print_uci_id_and_ok() {
     println!("id name Pretty Solid Chess");
