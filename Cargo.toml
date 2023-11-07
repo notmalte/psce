@@ -1,12 +1,15 @@
 [package]
 name = "psce"
+authors = ["malte"]
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+clap = { version = "4.4.7", features = ["derive"] }
 colored = "2.0.4"
 fastrand = "2.0.1"
 inquire = "0.6.2"
 rand = "0.8.5"
 rayon = "1.8.0"
 strum = { version = "0.25.0", features = ["derive"] }
+tokio = { version = "1.33.0", features = ["full"] }

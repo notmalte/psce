@@ -7,6 +7,7 @@ use crate::{
 
 use super::Move;
 
+#[derive(Clone)]
 pub struct KnightMoveGen {
     attack_table: [u64; 64],
 }

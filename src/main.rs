@@ -1,100 +1,76 @@
+use clap::{ArgGroup, Parser};
+use interactive::run_interactive;
+use perft::run_perft;
+use uci::run_uci;
+
 use crate::{
     codegen::{generate_and_print_bitboard_constants, generate_and_print_magic_numbers},
-    enums::Color,
-    movegen::MoveGen,
     position::Position,
-    search::search,
 };
 
 mod bitboard;
 mod codegen;
 mod constants;
 mod enums;
+mod interactive;
 mod movegen;
 mod perft;
 mod position;
 mod search;
+mod uci;
 
-const SEARCH_DEPTH: usize = 6;
+#[derive(Parser)]
+#[clap(author, version, about = "PSCE - Pretty Solid Chess Engine", long_about = None)]
+#[clap(group(ArgGroup::new("mode").args(&["bitboard_constants", "magic_numbers", "uci", "perft"]).required(false)))]
+struct Args {
+    /// Run interactive mode (default)
+    #[clap(long, short, group = "mode")]
+    interactive: bool,
 
-fn print_uci_id_and_ok() {
-    println!("id name Pretty Solid Chess Engine");
-    println!("id author notmalte");
-    println!("uciok");
+    /// Run PERFT benchmark
+    #[clap(long, short, value_name = "DEPTH", group = "mode")]
+    perft: Option<usize>,
+
+    /// Run in UCI mode
+    #[clap(long, short, group = "mode")]
+    uci: bool,
+
+    /// Enable logging UCI commands and responses to a file
+    #[clap(long, short, requires = "uci", conflicts_with_all = &["interactive", "perft", "bitboard_constants", "magic_numbers"])]
+    log_uci: bool,
+
+    /// Generate and print bitboard constants
+    #[clap(long, short, group = "mode")]
+    bitboard_constants: bool,
+
+    /// Generate and print magic numbers
+    #[clap(long, short, group = "mode")]
+    magic_numbers: bool,
 }
 
-fn run_uci(move_gen: &MoveGen) {
-    print_uci_id_and_ok();
+#[tokio::main]
+async fn main() {
+    let args = Args::parse();
 
-    let mut position = Position::default();
-
-    loop {
-        let mut input = String::new();
-
-        std::io::stdin().read_line(&mut input).unwrap();
-
-        let input = input.trim();
-
-        if input == "quit" {
-            break;
-        }
-
-        if input == "uci" {
-            print_uci_id_and_ok();
-            continue;
-        }
-
-        if input == "isready" {
-            println!("readyok");
-            continue;
-        }
-
-        if input == "ucinewgame" {
-            position = Position::default();
-            continue;
-        }
-
-        if input.starts_with("position") {
-            let position_opt = Position::from_uci(&move_gen, input.to_string());
-
-            if let Some(new_position) = position_opt {
-                position = new_position;
-            } else {
-                println!("info string Invalid position");
-            }
-
-            continue;
-        }
-
-        if input == "d" {
-            print!("{}", position);
-            continue;
-        }
-
-        if input.starts_with("go") {
-            let (best_eval, best_move) = search(&move_gen, &position, SEARCH_DEPTH);
-
-            if position.color_to_move() == Color::Black {
-                println!("info score cp {}", -best_eval);
-            } else {
-                println!("info score cp {}", best_eval);
-            }
-            println!("bestmove {}", best_move.unwrap().to_uci());
-
-            continue;
-        }
-    }
-}
-
-fn main() {
-    // TODO cli flag
-    if false {
+    if args.bitboard_constants {
         generate_and_print_bitboard_constants();
-        println!();
-        generate_and_print_magic_numbers();
+        return;
     }
 
-    let move_gen = MoveGen::new();
+    if args.magic_numbers {
+        generate_and_print_magic_numbers();
+        return;
+    }
 
-    run_uci(&move_gen);
+    if let Some(perft_depth) = args.perft {
+        run_perft(&Position::default(), perft_depth);
+        return;
+    }
+
+    if args.uci {
+        run_uci();
+        return;
+    }
+
+    run_interactive();
 }

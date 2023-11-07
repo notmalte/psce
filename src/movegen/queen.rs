@@ -6,6 +6,7 @@ use crate::{
 
 use super::{BishopMoveGen, Move, RookMoveGen};
 
+#[derive(Clone)]
 pub struct QueenMoveGen {
     rook: RookMoveGen,
     bishop: BishopMoveGen,

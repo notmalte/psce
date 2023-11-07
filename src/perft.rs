@@ -16,21 +16,27 @@ pub fn count_nodes(move_gen: &MoveGen, position: &Position, depth: usize) -> usi
     nodes
 }
 
-pub fn run_perft(move_gen: &MoveGen, position: &Position, depth: usize) {
+pub fn run_perft(position: &Position, depth: usize) {
     println!("Running PERFT to depth {}", depth);
+
+    let move_gen = MoveGen::new();
 
     let t_start = std::time::Instant::now();
 
     let mut total = 0;
 
-    let moves = move_gen.generate_legal_moves_expensive(position);
+    if depth == 0 {
+        total = 1;
+    } else {
+        let moves = move_gen.generate_legal_moves_expensive(position);
 
-    for (legal_move, new_position) in moves {
-        let nodes = count_nodes(move_gen, &new_position, depth - 1);
+        for (legal_move, new_position) in moves {
+            let nodes = count_nodes(&move_gen, &new_position, depth - 1);
 
-        total += nodes;
+            total += nodes;
 
-        println!("{}: {}", legal_move, nodes);
+            println!("{}: {}", legal_move, nodes);
+        }
     }
 
     let t_end = std::time::Instant::now();

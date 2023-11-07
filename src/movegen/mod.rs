@@ -118,6 +118,7 @@ impl Display for Move {
     }
 }
 
+#[derive(Clone)]
 pub struct MoveGen {
     pawn: PawnMoveGen,
     knight: KnightMoveGen,

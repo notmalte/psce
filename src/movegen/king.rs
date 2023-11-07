@@ -8,6 +8,7 @@ use crate::{
 
 use super::MoveGen;
 
+#[derive(Clone)]
 pub struct KingMoveGen {
     attack_table: [u64; 64],
 }
