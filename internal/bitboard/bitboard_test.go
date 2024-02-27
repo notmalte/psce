@@ -1,11 +1,12 @@
 package bitboard
 
 import (
+	"github.com/notmalte/psce/internal/constants"
 	"testing"
 )
 
 func TestGetRowCol(t *testing.T) {
-	bb := Bitboard(1 << B3)
+	bb := Bitboard(1 << constants.B3)
 
 	got := bb.GetRowCol(5, 1) // B3
 	if !got {
@@ -55,14 +56,14 @@ func TestClearRowCol(t *testing.T) {
 }
 
 func TestGetIndex(t *testing.T) {
-	bb := Bitboard(1 << B3)
+	bb := Bitboard(1 << constants.B3)
 
-	got := bb.GetIndex(B3)
+	got := bb.GetBit(constants.B3)
 	if !got {
 		t.Errorf("Expected true, got false")
 	}
 
-	got = bb.GetIndex(C3)
+	got = bb.GetBit(constants.C3)
 	if got {
 		t.Errorf("Expected false, got true")
 	}
@@ -71,18 +72,18 @@ func TestGetIndex(t *testing.T) {
 func TestSetIndex(t *testing.T) {
 	bb := Bitboard(0)
 
-	got := bb.GetIndex(G7)
+	got := bb.GetBit(constants.G7)
 	if got {
 		t.Errorf("Expected false, got true")
 	}
 
-	bb.SetIndex(G7)
-	got = bb.GetIndex(G7)
+	bb.SetBit(constants.G7)
+	got = bb.GetBit(constants.G7)
 	if !got {
 		t.Errorf("Expected true, got false")
 	}
 
-	got = bb.GetIndex(G6)
+	got = bb.GetBit(constants.G6)
 	if got {
 		t.Errorf("Expected false, got true")
 	}
@@ -91,14 +92,14 @@ func TestSetIndex(t *testing.T) {
 func TestClearIndex(t *testing.T) {
 	bb := Bitboard(0)
 
-	bb.SetIndex(G7)
-	got := bb.GetIndex(G7)
+	bb.SetBit(constants.G7)
+	got := bb.GetBit(constants.G7)
 	if !got {
 		t.Errorf("Expected true, got false")
 	}
 
-	bb.ClearIndex(G7)
-	got = bb.GetIndex(G7)
+	bb.ClearBit(constants.G7)
+	got = bb.GetBit(constants.G7)
 	if got {
 		t.Errorf("Expected false, got true")
 	}

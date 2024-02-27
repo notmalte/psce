@@ -1,7 +1,7 @@
-package bitboard
+package constants
 
 const (
-	A8 int = iota
+	A8 uint8 = iota
 	B8
 	C8
 	D8
@@ -65,4 +65,14 @@ const (
 	F1
 	G1
 	H1
+)
+
+const (
+	FileA uint64 = 0x0101010101010101
+	FileH        = FileA << 7
+)
+
+const (
+	NotFileA = ^FileA
+	NotFileH = ^FileH
 )

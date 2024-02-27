@@ -7,10 +7,10 @@ type Bitboard uint64
 func (b *Bitboard) String() string {
 	s := ""
 
-	for rank := 0; rank < 8; rank++ {
-		s += fmt.Sprintf("%d ", 8-rank)
-		for file := 0; file < 8; file++ {
-			if b.GetRowCol(rank, file) {
+	for row := range uint8(8) {
+		s += fmt.Sprintf("%d ", 8-row)
+		for col := range uint8(8) {
+			if b.GetRowCol(row, col) {
 				s += "1 "
 			} else {
 				s += "0 "
@@ -24,26 +24,26 @@ func (b *Bitboard) String() string {
 	return s
 }
 
-func (b *Bitboard) GetRowCol(row, col int) bool {
+func (b *Bitboard) GetRowCol(row, col uint8) bool {
 	return (*b>>(row*8+col))&1 == 1
 }
 
-func (b *Bitboard) SetRowCol(row, col int) {
+func (b *Bitboard) SetRowCol(row, col uint8) {
 	*b |= 1 << (row*8 + col)
 }
 
-func (b *Bitboard) ClearRowCol(row, col int) {
+func (b *Bitboard) ClearRowCol(row, col uint8) {
 	*b &= ^(1 << (row*8 + col))
 }
 
-func (b *Bitboard) GetIndex(index int) bool {
+func (b *Bitboard) GetBit(index uint8) bool {
 	return (*b>>index)&1 == 1
 }
 
-func (b *Bitboard) SetIndex(index int) {
+func (b *Bitboard) SetBit(index uint8) {
 	*b |= 1 << index
 }
 
-func (b *Bitboard) ClearIndex(index int) {
+func (b *Bitboard) ClearBit(index uint8) {
 	*b &= ^(1 << index)
 }
