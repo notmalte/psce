@@ -20,15 +20,15 @@ func (pmg *PawnMoveGen) GenerateAttackTable() [2][64]uint64 {
 
 func (pmg *PawnMoveGen) MaskAttacks(color uint8, square uint8) uint64 {
 	attacks := uint64(0)
-	bb := bitboard.Bitboard(0)
-	bb.SetBit(square)
+	bb := uint64(0)
+	bitboard.SetBit(&bb, square)
 
 	if color == constants.ColorWhite {
-		attacks |= (uint64(bb) >> 7) & constants.NotFileA
-		attacks |= (uint64(bb) >> 9) & constants.NotFileH
+		attacks |= (bb >> 7) & constants.NotFileA
+		attacks |= (bb >> 9) & constants.NotFileH
 	} else {
-		attacks |= (uint64(bb) << 7) & constants.NotFileH
-		attacks |= (uint64(bb) << 9) & constants.NotFileA
+		attacks |= (bb << 7) & constants.NotFileH
+		attacks |= (bb << 9) & constants.NotFileA
 	}
 
 	return attacks

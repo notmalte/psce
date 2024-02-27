@@ -2,15 +2,13 @@ package bitboard
 
 import "fmt"
 
-type Bitboard uint64
-
-func (b *Bitboard) String() string {
+func String(bb uint64) string {
 	s := ""
 
 	for row := range uint8(8) {
 		s += fmt.Sprintf("%d ", 8-row)
 		for col := range uint8(8) {
-			if b.GetRowCol(row, col) {
+			if GetRowCol(bb, row, col) {
 				s += "1 "
 			} else {
 				s += "0 "
@@ -24,26 +22,26 @@ func (b *Bitboard) String() string {
 	return s
 }
 
-func (b *Bitboard) GetRowCol(row, col uint8) bool {
-	return (*b>>(row*8+col))&1 == 1
+func GetRowCol(bb uint64, row, col uint8) bool {
+	return (bb>>(row*8+col))&1 == 1
 }
 
-func (b *Bitboard) SetRowCol(row, col uint8) {
-	*b |= 1 << (row*8 + col)
+func SetRowCol(bb *uint64, row, col uint8) {
+	*bb |= 1 << (row*8 + col)
 }
 
-func (b *Bitboard) ClearRowCol(row, col uint8) {
-	*b &= ^(1 << (row*8 + col))
+func ClearRowCol(bb *uint64, row, col uint8) {
+	*bb &= ^(1 << (row*8 + col))
 }
 
-func (b *Bitboard) GetBit(index uint8) bool {
-	return (*b>>index)&1 == 1
+func GetBit(bb uint64, index uint8) bool {
+	return (bb>>index)&1 == 1
 }
 
-func (b *Bitboard) SetBit(index uint8) {
-	*b |= 1 << index
+func SetBit(bb *uint64, index uint8) {
+	*bb |= 1 << index
 }
 
-func (b *Bitboard) ClearBit(index uint8) {
-	*b &= ^(1 << index)
+func ClearBit(bb *uint64, index uint8) {
+	*bb &= ^(1 << index)
 }

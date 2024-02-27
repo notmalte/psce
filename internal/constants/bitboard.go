@@ -69,10 +69,14 @@ const (
 
 const (
 	FileA uint64 = 0x0101010101010101
+	FileB uint64 = FileA << 1
+	FileG uint64 = FileA << 6
 	FileH        = FileA << 7
 )
 
 const (
-	NotFileA = ^FileA
-	NotFileH = ^FileH
+	NotFileA  = ^FileA
+	NotFileH  = ^FileH
+	NotFileAB = ^FileA & ^FileB
+	NotFileGH = ^FileG & ^FileH
 )

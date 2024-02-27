@@ -7,9 +7,9 @@ import (
 )
 
 func main() {
-	bb := bitboard.Bitboard(0)
+	bb := uint64(0)
 
-	bb.SetBit(constants.A4)
+	bitboard.SetBit(&bb, constants.A4)
 
-	fmt.Println(bb.String())
+	fmt.Println(bitboard.String(bb))
 }

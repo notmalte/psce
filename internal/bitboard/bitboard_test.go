@@ -6,100 +6,100 @@ import (
 )
 
 func TestGetRowCol(t *testing.T) {
-	bb := Bitboard(1 << constants.B3)
+	bb := uint64(1 << constants.B3)
 
-	got := bb.GetRowCol(5, 1) // B3
+	got := GetRowCol(bb, 5, 1) // B3
 	if !got {
 		t.Errorf("Expected true, got false")
 	}
 
-	got = bb.GetRowCol(5, 2) // C3
+	got = GetRowCol(bb, 5, 2) // C3
 	if got {
 		t.Errorf("Expected false, got true")
 	}
 }
 
 func TestSetRowCol(t *testing.T) {
-	bb := Bitboard(0)
+	bb := uint64(0)
 
-	got := bb.GetRowCol(1, 6) // G7
+	got := GetRowCol(bb, 1, 6) // G7
 	if got {
 		t.Errorf("Expected false, got true")
 	}
 
-	bb.SetRowCol(1, 6) // G7
-	got = bb.GetRowCol(1, 6)
+	SetRowCol(&bb, 1, 6) // G7
+	got = GetRowCol(bb, 1, 6)
 	if !got {
 		t.Errorf("Expected true, got false")
 	}
 
-	got = bb.GetRowCol(2, 6) // G6
+	got = GetRowCol(bb, 2, 6) // G6
 	if got {
 		t.Errorf("Expected false, got true")
 	}
 }
 
 func TestClearRowCol(t *testing.T) {
-	bb := Bitboard(0)
+	bb := uint64(0)
 
-	bb.SetRowCol(1, 6) // G7
-	got := bb.GetRowCol(1, 6)
+	SetRowCol(&bb, 1, 6) // G7
+	got := GetRowCol(bb, 1, 6)
 	if !got {
 		t.Errorf("Expected true, got false")
 	}
 
-	bb.ClearRowCol(1, 6)
-	got = bb.GetRowCol(1, 6)
+	ClearRowCol(&bb, 1, 6)
+	got = GetRowCol(bb, 1, 6)
 	if got {
 		t.Errorf("Expected false, got true")
 	}
 }
 
-func TestGetIndex(t *testing.T) {
-	bb := Bitboard(1 << constants.B3)
+func TestGetBit(t *testing.T) {
+	bb := uint64(1 << constants.B3)
 
-	got := bb.GetBit(constants.B3)
+	got := GetBit(bb, constants.B3)
 	if !got {
 		t.Errorf("Expected true, got false")
 	}
 
-	got = bb.GetBit(constants.C3)
+	got = GetBit(bb, constants.C3)
 	if got {
 		t.Errorf("Expected false, got true")
 	}
 }
 
-func TestSetIndex(t *testing.T) {
-	bb := Bitboard(0)
+func TestSetBit(t *testing.T) {
+	bb := uint64(0)
 
-	got := bb.GetBit(constants.G7)
+	got := GetBit(bb, constants.G7)
 	if got {
 		t.Errorf("Expected false, got true")
 	}
 
-	bb.SetBit(constants.G7)
-	got = bb.GetBit(constants.G7)
+	SetBit(&bb, constants.G7)
+	got = GetBit(bb, constants.G7)
 	if !got {
 		t.Errorf("Expected true, got false")
 	}
 
-	got = bb.GetBit(constants.G6)
+	got = GetBit(bb, constants.G6)
 	if got {
 		t.Errorf("Expected false, got true")
 	}
 }
 
-func TestClearIndex(t *testing.T) {
-	bb := Bitboard(0)
+func TestClearBit(t *testing.T) {
+	bb := uint64(0)
 
-	bb.SetBit(constants.G7)
-	got := bb.GetBit(constants.G7)
+	SetBit(&bb, constants.G7)
+	got := GetBit(bb, constants.G7)
 	if !got {
 		t.Errorf("Expected true, got false")
 	}
 
-	bb.ClearBit(constants.G7)
-	got = bb.GetBit(constants.G7)
+	ClearBit(&bb, constants.G7)
+	got = GetBit(bb, constants.G7)
 	if got {
 		t.Errorf("Expected false, got true")
 	}
