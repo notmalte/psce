@@ -6,8 +6,17 @@ func IndexToRowCol(index uint8) (uint8, uint8) {
 	return index / 8, index % 8
 }
 
+func IndexToRowColInt8(index uint8) (int8, int8) {
+	row, col := IndexToRowCol(index)
+	return int8(row), int8(col)
+}
+
 func RowColToIndex(row, col uint8) uint8 {
 	return row*8 + col
+}
+
+func RowColToIndexInt8(row, col int8) uint8 {
+	return uint8(row*8 + col)
 }
 
 func GetBit(bb uint64, index uint8) bool {
