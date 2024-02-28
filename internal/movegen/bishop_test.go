@@ -44,3 +44,28 @@ func TestBishopGenerateAttackCandidateTable(t *testing.T) {
 	}
 
 }
+
+func TestBishopMaskAttacks(t *testing.T) {
+	bmg := BishopMoveGen{}
+
+	occupancy := uint64(0)
+	bitboard.SetBit(&occupancy, constants.C7)
+	bitboard.SetBit(&occupancy, constants.D4)
+	bitboard.SetBit(&occupancy, constants.G3)
+
+	got := bmg.MaskAttacks(constants.E5, occupancy)
+
+	expected := uint64(0)
+	bitboard.SetBit(&expected, constants.H8)
+	bitboard.SetBit(&expected, constants.C7)
+	bitboard.SetBit(&expected, constants.G7)
+	bitboard.SetBit(&expected, constants.D6)
+	bitboard.SetBit(&expected, constants.F6)
+	bitboard.SetBit(&expected, constants.D4)
+	bitboard.SetBit(&expected, constants.F4)
+	bitboard.SetBit(&expected, constants.G3)
+
+	if got != expected {
+		t.Errorf("Expected %d, got %d", expected, got)
+	}
+}
