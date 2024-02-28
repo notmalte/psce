@@ -50,5 +50,31 @@ func TestRookGenerateAttackCandidateTable(t *testing.T) {
 	if got != expected {
 		t.Errorf("Expected %d, got %d", expected, got)
 	}
+}
 
+func TestRookMaskAttacks(t *testing.T) {
+	rmg := RookMoveGen{}
+
+	occupancy := uint64(0)
+	bitboard.SetBit(&occupancy, constants.D6)
+	bitboard.SetBit(&occupancy, constants.A3)
+	bitboard.SetBit(&occupancy, constants.F3)
+
+	got := rmg.MaskAttacks(constants.D3, occupancy)
+
+	expected := uint64(0)
+	bitboard.SetBit(&expected, constants.D6)
+	bitboard.SetBit(&expected, constants.D5)
+	bitboard.SetBit(&expected, constants.D4)
+	bitboard.SetBit(&expected, constants.A3)
+	bitboard.SetBit(&expected, constants.B3)
+	bitboard.SetBit(&expected, constants.C3)
+	bitboard.SetBit(&expected, constants.E3)
+	bitboard.SetBit(&expected, constants.F3)
+	bitboard.SetBit(&expected, constants.D2)
+	bitboard.SetBit(&expected, constants.D1)
+
+	if got != expected {
+		t.Errorf("Expected %d, got %d", expected, got)
+	}
 }

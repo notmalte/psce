@@ -42,7 +42,6 @@ func TestBishopGenerateAttackCandidateTable(t *testing.T) {
 	if got != expected {
 		t.Errorf("Expected %d, got %d", expected, got)
 	}
-
 }
 
 func TestBishopMaskAttacks(t *testing.T) {
