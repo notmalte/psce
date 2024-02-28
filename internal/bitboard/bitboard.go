@@ -7,8 +7,7 @@ func IndexToRowCol(index uint8) (uint8, uint8) {
 }
 
 func IndexToRowColInt8(index uint8) (int8, int8) {
-	row, col := IndexToRowCol(index)
-	return int8(row), int8(col)
+	return int8(index / 8), int8(index % 8)
 }
 
 func RowColToIndex(row, col uint8) uint8 {
