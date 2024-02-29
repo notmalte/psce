@@ -77,3 +77,13 @@ func (rmg *RookMoveGen) MaskAttacks(square uint8, occupancy uint64) uint64 {
 
 	return attacks
 }
+
+func (rmg *RookMoveGen) GenerateMagicNumbers() [64]uint64 {
+	magicNumbers := [64]uint64{}
+
+	for square := range uint8(64) {
+		magicNumbers[square] = GenerateMagicNumber(square, rmg)
+	}
+
+	return magicNumbers
+}

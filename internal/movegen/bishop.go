@@ -109,3 +109,13 @@ func (bmg *BishopMoveGen) MaskAttacks(square uint8, occupancy uint64) uint64 {
 
 	return attacks
 }
+
+func (bmg *BishopMoveGen) GenerateMagicNumbers() [64]uint64 {
+	magicNumbers := [64]uint64{}
+
+	for square := range uint8(64) {
+		magicNumbers[square] = GenerateMagicNumber(square, bmg)
+	}
+
+	return magicNumbers
+}
