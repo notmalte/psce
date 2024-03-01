@@ -1,5 +1,7 @@
 package constants
 
+import "errors"
+
 const (
 	WhitePawn uint8 = iota
 	WhiteKnight
@@ -44,5 +46,46 @@ func PieceString(piece uint8) string {
 		return "k"
 	default:
 		return "?"
+	}
+}
+
+func PieceColor(piece uint8) uint8 {
+	if piece < BlackPawn {
+		return ColorWhite
+	} else {
+		return ColorBlack
+	}
+}
+
+var ErrInvalidPiece = errors.New("invalid piece")
+
+func StringToPiece(s string) (uint8, error) {
+	switch s {
+	case "P":
+		return WhitePawn, nil
+	case "N":
+		return WhiteKnight, nil
+	case "B":
+		return WhiteBishop, nil
+	case "R":
+		return WhiteRook, nil
+	case "Q":
+		return WhiteQueen, nil
+	case "K":
+		return WhiteKing, nil
+	case "p":
+		return BlackPawn, nil
+	case "n":
+		return BlackKnight, nil
+	case "b":
+		return BlackBishop, nil
+	case "r":
+		return BlackRook, nil
+	case "q":
+		return BlackQueen, nil
+	case "k":
+		return BlackKing, nil
+	default:
+		return 0, ErrInvalidPiece
 	}
 }

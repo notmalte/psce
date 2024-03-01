@@ -30,3 +30,26 @@ func CastlingString(castling uint8) string {
 
 	return s
 }
+
+func StringToCastling(s string) uint8 {
+	castling := CastlingNone
+
+	if s == "-" {
+		return castling
+	}
+
+	for _, c := range s {
+		switch c {
+		case 'K':
+			castling |= CastlingWhiteKingside
+		case 'Q':
+			castling |= CastlingWhiteQueenside
+		case 'k':
+			castling |= CastlingBlackKingside
+		case 'q':
+			castling |= CastlingBlackQueenside
+		}
+	}
+
+	return castling
+}
