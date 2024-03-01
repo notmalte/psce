@@ -9,7 +9,7 @@ import (
 func TestBishopMaskAttackCandidates(t *testing.T) {
 	bmg := BishopMoveGen{}
 
-	got := bmg.MaskAttackCandidates(constants.F6)
+	got := bmg.maskAttackCandidates(constants.F6)
 
 	expected := uint64(0)
 	bitboard.SetBit(&expected, constants.E7)
@@ -28,7 +28,7 @@ func TestBishopMaskAttackCandidates(t *testing.T) {
 func TestBishopGenerateAttackCandidateTable(t *testing.T) {
 	bmg := BishopMoveGen{}
 
-	table := bmg.GenerateAttackCandidateTable()
+	table := bmg.generateAttackCandidateTable()
 
 	got := table[constants.A6]
 
@@ -52,7 +52,7 @@ func TestBishopMaskAttacks(t *testing.T) {
 	bitboard.SetBit(&occupancy, constants.D4)
 	bitboard.SetBit(&occupancy, constants.G3)
 
-	got := bmg.MaskAttacks(constants.E5, occupancy)
+	got := bmg.maskAttacks(constants.E5, occupancy)
 
 	expected := uint64(0)
 	bitboard.SetBit(&expected, constants.H8)

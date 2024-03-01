@@ -5,15 +5,15 @@ import (
 	"math/rand/v2"
 )
 
-const MaxIndexCount = 1 << 12
-const MaxMagicNumberGenerationAttempts = 1_000_000_000
+const maxIndexCount = 1 << 12
+const maxMagicNumberGenerationAttempts = 1_000_000_000
 
-type CandidateMoveGen interface {
-	MaskAttackCandidates(square uint8) uint64
-	MaskAttacks(square uint8, occupancy uint64) uint64
+type candidateMoveGen interface {
+	maskAttackCandidates(square uint8) uint64
+	maskAttacks(square uint8, occupancy uint64) uint64
 }
 
-func GenerateMagicNumberCandidate() uint64 {
+func generateMagicNumberCandidate() uint64 {
 	a := rand.Uint64()
 	b := rand.Uint64()
 	c := rand.Uint64()
@@ -21,31 +21,35 @@ func GenerateMagicNumberCandidate() uint64 {
 	return a & b & c
 }
 
-func GenerateMagicNumber(square uint8, cmg CandidateMoveGen) uint64 {
-	occupancies := [MaxIndexCount]uint64{}
-	attacks := [MaxIndexCount]uint64{}
+func calcMagicIndex(occupancy uint64, magicNumber uint64, bitsInMask int) uint64 {
+	return (occupancy * magicNumber) >> (64 - bitsInMask)
+}
 
-	candidateMask := cmg.MaskAttackCandidates(square)
+func generateMagicNumber(square uint8, cmg candidateMoveGen) uint64 {
+	occupancies := [maxIndexCount]uint64{}
+	attacks := [maxIndexCount]uint64{}
+
+	candidateMask := cmg.maskAttackCandidates(square)
 	bitsInMask := bits.OnesCount64(candidateMask)
 	indexUpperLimit := uint64(1 << bitsInMask)
 
 	for index := uint64(0); index < indexUpperLimit; index++ {
-		occupancies[index] = MaskOccupancy(candidateMask, index)
-		attacks[index] = cmg.MaskAttacks(square, occupancies[index])
+		occupancies[index] = maskOccupancy(candidateMask, index)
+		attacks[index] = cmg.maskAttacks(square, occupancies[index])
 	}
 
 outer:
-	for range MaxMagicNumberGenerationAttempts {
-		magicNumberCandidate := GenerateMagicNumberCandidate()
+	for range maxMagicNumberGenerationAttempts {
+		magicNumberCandidate := generateMagicNumberCandidate()
 
 		if bits.OnesCount64((candidateMask*magicNumberCandidate)&0xFF00_0000_0000_0000) < 6 {
 			continue
 		}
 
-		usedAttacks := [MaxIndexCount]uint64{}
+		usedAttacks := [maxIndexCount]uint64{}
 
-		for index := uint64(0); index < indexUpperLimit; index++ {
-			magicIndex := (occupancies[index] * magicNumberCandidate) >> (64 - bitsInMask)
+		for index := range indexUpperLimit {
+			magicIndex := calcMagicIndex(occupancies[index], magicNumberCandidate, bitsInMask)
 
 			if usedAttacks[magicIndex] == 0 {
 				usedAttacks[magicIndex] = attacks[index]

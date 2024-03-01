@@ -9,7 +9,7 @@ import (
 func TestRookMaskAttackCandidates(t *testing.T) {
 	rmg := RookMoveGen{}
 
-	got := rmg.MaskAttackCandidates(constants.F7)
+	got := rmg.maskAttackCandidates(constants.F7)
 
 	expected := uint64(0)
 	bitboard.SetBit(&expected, constants.B7)
@@ -31,7 +31,7 @@ func TestRookMaskAttackCandidates(t *testing.T) {
 func TestRookGenerateAttackCandidateTable(t *testing.T) {
 	rmg := RookMoveGen{}
 
-	table := rmg.GenerateAttackCandidateTable()
+	table := rmg.generateAttackCandidateTable()
 
 	got := table[constants.G3]
 
@@ -60,7 +60,7 @@ func TestRookMaskAttacks(t *testing.T) {
 	bitboard.SetBit(&occupancy, constants.A3)
 	bitboard.SetBit(&occupancy, constants.F3)
 
-	got := rmg.MaskAttacks(constants.D3, occupancy)
+	got := rmg.maskAttacks(constants.D3, occupancy)
 
 	expected := uint64(0)
 	bitboard.SetBit(&expected, constants.D6)

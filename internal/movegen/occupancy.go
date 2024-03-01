@@ -5,7 +5,7 @@ import (
 	"math/bits"
 )
 
-func MaskOccupancy(attackMask uint64, index uint64) uint64 {
+func maskOccupancy(attackMask uint64, index uint64) uint64 {
 	occupancy := uint64(0)
 	bitsInMask := bits.OnesCount64(attackMask)
 

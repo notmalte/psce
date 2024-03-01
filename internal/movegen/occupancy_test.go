@@ -9,7 +9,7 @@ import (
 
 func TestMaskOccupancy(t *testing.T) {
 	rmg := RookMoveGen{}
-	candidateMask := rmg.MaskAttackCandidates(constants.A1)
+	candidateMask := rmg.maskAttackCandidates(constants.A1)
 	bitsInMask := bits.OnesCount64(candidateMask)
 	maxIndex := uint64((1 << bitsInMask) - 1)
 
@@ -17,20 +17,20 @@ func TestMaskOccupancy(t *testing.T) {
 		t.Errorf("Expected 4095, got %d", maxIndex)
 	}
 
-	occupancy := MaskOccupancy(candidateMask, 0)
+	occupancy := maskOccupancy(candidateMask, 0)
 	expected := uint64(0)
 	if occupancy != expected {
 		t.Errorf("Expected %d, got %d", expected, occupancy)
 	}
 
-	occupancy = MaskOccupancy(candidateMask, 1)
+	occupancy = maskOccupancy(candidateMask, 1)
 	expected = uint64(0)
 	bitboard.SetBit(&expected, constants.A7)
 	if occupancy != expected {
 		t.Errorf("Expected %d, got %d", expected, occupancy)
 	}
 
-	occupancy = MaskOccupancy(candidateMask, maxIndex)
+	occupancy = maskOccupancy(candidateMask, maxIndex)
 	expected = uint64(0)
 	bitboard.SetBit(&expected, constants.A7)
 	bitboard.SetBit(&expected, constants.A6)
