@@ -1,5 +1,10 @@
 package constants
 
+import (
+	"fmt"
+	"github.com/notmalte/psce/internal/bitboard"
+)
+
 const (
 	A8 uint8 = iota
 	B8
@@ -65,12 +70,13 @@ const (
 	F1
 	G1
 	H1
+	NoSquare
 )
 
 const (
 	FileA uint64 = 0x0101010101010101
-	FileB uint64 = FileA << 1
-	FileG uint64 = FileA << 6
+	FileB        = FileA << 1
+	FileG        = FileA << 6
 	FileH        = FileA << 7
 )
 
@@ -80,3 +86,8 @@ const (
 	NotFileAB = ^FileA & ^FileB
 	NotFileGH = ^FileG & ^FileH
 )
+
+func SquareString(square uint8) string {
+	row, col := bitboard.IndexToRowCol(square)
+	return fmt.Sprintf("%c%d", 'A'+col, 8-row)
+}
