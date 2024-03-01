@@ -124,3 +124,8 @@ func PositionFromFen(fen string) (*Position, error) {
 
 	return pos, nil
 }
+
+func Initial() *Position {
+	pos, _ := PositionFromFen(constants.InitialPositionFEN)
+	return pos
+}
