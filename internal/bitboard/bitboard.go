@@ -19,7 +19,7 @@ func RowColToIndexInt8(row, col int8) uint8 {
 }
 
 func GetBit(bb uint64, index uint8) bool {
-	return (bb>>index)&1 == 1
+	return bb&(1<<index) != 0
 }
 
 func SetBit(bb *uint64, index uint8) {

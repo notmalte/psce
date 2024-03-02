@@ -3,6 +3,8 @@ package movegen
 import (
 	"github.com/notmalte/psce/internal/bitboard"
 	"github.com/notmalte/psce/internal/constants"
+	"github.com/notmalte/psce/internal/position"
+	"math/bits"
 )
 
 type KingMoveGen struct {
@@ -45,4 +47,106 @@ func NewKingMoveGen() *KingMoveGen {
 	kmg.attackTable = kmg.generateAttackTable()
 
 	return kmg
+}
+
+func (kmg *KingMoveGen) GeneratePseudoLegalMoves(pos *position.Position, mg *MoveGen) []Move {
+	isWhite := pos.ColorToMove == constants.ColorWhite
+
+	var otherColor uint8
+	var piece uint8
+	var kingsideCastleFlag uint8
+	var queensideCastleFlag uint8
+	if isWhite {
+		otherColor = constants.ColorBlack
+		piece = constants.WhiteKing
+		kingsideCastleFlag = constants.CastlingWhiteKingside
+		queensideCastleFlag = constants.CastlingWhiteQueenside
+	} else {
+		otherColor = constants.ColorWhite
+		piece = constants.BlackKing
+		kingsideCastleFlag = constants.CastlingBlackKingside
+		queensideCastleFlag = constants.CastlingBlackQueenside
+	}
+
+	moves := []Move{}
+	bb := pos.PieceBitboards[piece]
+
+	for bb != 0 {
+		fromSquare := uint8(bits.TrailingZeros64(bb))
+
+		attacks := kmg.GetAttacks(fromSquare) & ^pos.ColorBitboards[pos.ColorToMove]
+
+		for attacks != 0 {
+			toSquare := uint8(bits.TrailingZeros64(attacks))
+
+			flags := FlagNone
+			if bitboard.GetBit(pos.ColorBitboards[otherColor], toSquare) {
+				flags = FlagCapture
+			}
+
+			moves = append(moves, Move{
+				FromSquare: fromSquare,
+				ToSquare:   toSquare,
+				Piece:      piece,
+				Flags:      flags,
+			})
+
+			bitboard.ClearBit(&attacks, toSquare)
+		}
+
+		bitboard.ClearBit(&bb, fromSquare)
+	}
+
+	if pos.CastlingRights&(kingsideCastleFlag|queensideCastleFlag) != 0 {
+		var kingsideEmptyMask uint64
+		var queensideEmptyMask uint64
+		var cSquare uint8
+		var dSquare uint8
+		var eSquare uint8
+		var fSquare uint8
+		var gSquare uint8
+		if isWhite {
+			kingsideEmptyMask = constants.CastlingWhiteKingsideEmptyMask
+			queensideEmptyMask = constants.CastlingWhiteQueensideEmptyMask
+			cSquare = constants.C1
+			dSquare = constants.D1
+			eSquare = constants.E1
+			fSquare = constants.F1
+			gSquare = constants.G1
+		} else {
+			kingsideEmptyMask = constants.CastlingBlackKingsideEmptyMask
+			queensideEmptyMask = constants.CastlingBlackQueensideEmptyMask
+			cSquare = constants.C8
+			dSquare = constants.D8
+			eSquare = constants.E8
+			fSquare = constants.F8
+			gSquare = constants.G8
+		}
+
+		if pos.CastlingRights&kingsideCastleFlag != 0 &&
+			pos.ColorBitboards[constants.ColorBoth]&kingsideEmptyMask == 0 &&
+			!mg.IsSquareAttacked(pos, eSquare, otherColor) &&
+			!mg.IsSquareAttacked(pos, fSquare, otherColor) {
+			moves = append(moves, Move{
+				FromSquare: eSquare,
+				ToSquare:   gSquare,
+				Piece:      piece,
+				Flags:      FlagCastle,
+			})
+		}
+
+		if pos.CastlingRights&queensideCastleFlag != 0 &&
+			pos.ColorBitboards[constants.ColorBoth]&queensideEmptyMask == 0 &&
+			!mg.IsSquareAttacked(pos, eSquare, otherColor) &&
+			!mg.IsSquareAttacked(pos, dSquare, otherColor) {
+			moves = append(moves, Move{
+				FromSquare: eSquare,
+				ToSquare:   cSquare,
+				Piece:      piece,
+				Flags:      FlagCastle,
+			})
+		}
+	}
+
+	return moves
 }

@@ -22,7 +22,7 @@ func Empty() *Position {
 	pos.PieceBitboards = [12]uint64{}
 	pos.ColorBitboards = [3]uint64{}
 	pos.EnPassantSquare = constants.NoSquare
-	pos.CastlingRights = 0
+	pos.CastlingRights = constants.CastlingNone
 	pos.ColorToMove = constants.ColorWhite
 
 	return pos

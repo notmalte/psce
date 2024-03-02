@@ -13,6 +13,8 @@ type Move struct {
 	PromotionPiece uint8
 }
 
+const FlagNone uint8 = 0
+
 const (
 	FlagPromotion uint8 = 1 << iota
 	FlagCapture

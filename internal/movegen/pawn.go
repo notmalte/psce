@@ -77,6 +77,13 @@ func (pmg *PawnMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move 
 	moves := []Move{}
 	bb := pos.PieceBitboards[piece]
 
+	/*
+		TODO: this can be done by shifting and masking,
+			<< +-8 for single push, << +-16 for double push,
+			& with constants.NotFileA and constants.NotFileH for file checks
+		 	<< +-7 and << +-9 for captures
+	*/
+
 	for bb != 0 {
 		fromSquare := uint8(bits.TrailingZeros64(bb))
 
