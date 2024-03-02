@@ -9,7 +9,7 @@ import (
 func TestPawnMaskAttacks(t *testing.T) {
 	pmg := PawnMoveGen{}
 
-	got := pmg.MaskAttacks(constants.ColorWhite, constants.A2)
+	got := pmg.maskAttacks(constants.ColorWhite, constants.A2)
 
 	expected := uint64(0)
 	bitboard.SetBit(&expected, constants.B3)
@@ -18,7 +18,7 @@ func TestPawnMaskAttacks(t *testing.T) {
 		t.Errorf("Expected %d, got %d", expected, got)
 	}
 
-	got = pmg.MaskAttacks(constants.ColorBlack, constants.A7)
+	got = pmg.maskAttacks(constants.ColorBlack, constants.A7)
 
 	expected = uint64(0)
 	bitboard.SetBit(&expected, constants.B6)
@@ -27,7 +27,7 @@ func TestPawnMaskAttacks(t *testing.T) {
 		t.Errorf("Expected %d, got %d", expected, got)
 	}
 
-	got = pmg.MaskAttacks(constants.ColorWhite, constants.B4)
+	got = pmg.maskAttacks(constants.ColorWhite, constants.B4)
 
 	expected = uint64(0)
 	bitboard.SetBit(&expected, constants.A5)
@@ -41,7 +41,7 @@ func TestPawnMaskAttacks(t *testing.T) {
 func TestPawnGenerateAttackTable(t *testing.T) {
 	pmg := PawnMoveGen{}
 
-	table := pmg.GenerateAttackTable()
+	table := pmg.generateAttackTable()
 
 	got := table[constants.ColorWhite][constants.E3]
 

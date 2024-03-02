@@ -9,7 +9,7 @@ import (
 func TestKnightMaskAttacks(t *testing.T) {
 	kmg := KnightMoveGen{}
 
-	got := kmg.MaskAttacks(constants.A2)
+	got := kmg.maskAttacks(constants.A2)
 
 	expected := uint64(0)
 	bitboard.SetBit(&expected, constants.B4)
@@ -20,7 +20,7 @@ func TestKnightMaskAttacks(t *testing.T) {
 		t.Errorf("Expected %d, got %d", expected, got)
 	}
 
-	got = kmg.MaskAttacks(constants.D4)
+	got = kmg.maskAttacks(constants.D4)
 
 	expected = uint64(0)
 	bitboard.SetBit(&expected, constants.B3)
@@ -40,7 +40,7 @@ func TestKnightMaskAttacks(t *testing.T) {
 func TestKnightGenerateAttackTable(t *testing.T) {
 	kmg := KnightMoveGen{}
 
-	table := kmg.GenerateAttackTable()
+	table := kmg.generateAttackTable()
 
 	got := table[constants.E3]
 

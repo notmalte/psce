@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/notmalte/psce/internal/bitboard"
 	"github.com/notmalte/psce/internal/constants"
+	"github.com/notmalte/psce/internal/helpers"
 	"strings"
 )
 
@@ -38,7 +39,7 @@ func (pos *Position) String() string {
 
 			for piece := range constants.PiecesCount {
 				if bitboard.GetBit(pos.PieceBitboards[piece], index) {
-					s += fmt.Sprintf("%s ", constants.PieceString(piece))
+					s += fmt.Sprintf("%s ", helpers.PieceString(piece))
 					continue outer
 				}
 			}
@@ -50,13 +51,13 @@ func (pos *Position) String() string {
 
 	s += "  A B C D E F G H\n\n"
 
-	s += fmt.Sprintf("Color to move: %s\n", constants.ColorString(pos.ColorToMove))
+	s += fmt.Sprintf("Color to move: %s\n", helpers.ColorString(pos.ColorToMove))
 	if pos.EnPassantSquare != constants.NoSquare {
-		s += fmt.Sprintf("En passant square: %s\n", constants.SquareString(pos.EnPassantSquare))
+		s += fmt.Sprintf("En passant square: %s\n", helpers.SquareString(pos.EnPassantSquare))
 	} else {
 		s += "En passant square: -\n"
 	}
-	s += fmt.Sprintf("Castling rights: %s", constants.CastlingString(pos.CastlingRights))
+	s += fmt.Sprintf("Castling rights: %s", helpers.CastlingString(pos.CastlingRights))
 
 	return s
 }
@@ -84,11 +85,11 @@ func PositionFromFen(fen string) (*Position, error) {
 				col += int(c - '0')
 			} else {
 				index := bitboard.RowColToIndex(uint8(row), uint8(col))
-				piece, err := constants.StringToPiece(string(c))
+				piece, err := helpers.StringToPiece(string(c))
 				if err != nil {
 					return nil, ErrInvalidFen
 				}
-				color := constants.PieceColor(piece)
+				color := helpers.PieceColor(piece)
 
 				bitboard.SetBit(&pos.PieceBitboards[piece], index)
 				bitboard.SetBit(&pos.ColorBitboards[color], index)
@@ -112,10 +113,10 @@ func PositionFromFen(fen string) (*Position, error) {
 		return nil, ErrInvalidFen
 	}
 
-	pos.CastlingRights = constants.StringToCastling(fenParts[2])
+	pos.CastlingRights = helpers.StringToCastling(fenParts[2])
 
 	if fenParts[3] != "-" {
-		square, err := constants.StringToSquare(fenParts[3])
+		square, err := helpers.StringToSquare(fenParts[3])
 		if err != nil {
 			return nil, ErrInvalidFen
 		}

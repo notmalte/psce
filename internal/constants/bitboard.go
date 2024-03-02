@@ -1,11 +1,5 @@
 package constants
 
-import (
-	"errors"
-	"fmt"
-	"github.com/notmalte/psce/internal/bitboard"
-)
-
 const (
 	A8 uint8 = iota
 	B8
@@ -87,25 +81,3 @@ const (
 	NotFileAB = ^FileA & ^FileB
 	NotFileGH = ^FileG & ^FileH
 )
-
-func SquareString(square uint8) string {
-	row, col := bitboard.IndexToRowCol(square)
-	return fmt.Sprintf("%c%d", 'A'+col, 8-row)
-}
-
-var ErrInvalidSquare = errors.New("invalid square")
-
-func StringToSquare(s string) (uint8, error) {
-	if len(s) != 2 {
-		return NoSquare, ErrInvalidSquare
-	}
-
-	col := s[0] - 'A'
-	row := 8 - (s[1] - '0')
-
-	if col < 0 || col > 7 || row < 0 || row > 7 {
-		return NoSquare, ErrInvalidSquare
-	}
-
-	return bitboard.RowColToIndex(row, col), nil
-}

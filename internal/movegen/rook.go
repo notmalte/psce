@@ -126,7 +126,7 @@ func (rmg *RookMoveGen) generateAttackTable(candidateTable [64]uint64, magicNumb
 	return attackTable
 }
 
-func (rmg *RookMoveGen) getAttacks(square uint8, occupancy uint64) uint64 {
+func (rmg *RookMoveGen) GetAttacks(square uint8, occupancy uint64) uint64 {
 	maskedOccupancy := occupancy & rmg.attackCandidateTable[square]
 	magicNumber := rmg.magicNumbers[square]
 	relevantBits := rmg.relevantBitsTable[square]
@@ -136,7 +136,7 @@ func (rmg *RookMoveGen) getAttacks(square uint8, occupancy uint64) uint64 {
 	return rmg.attackTable[square][magicIndex]
 }
 
-func newRookMoveGen() *RookMoveGen {
+func NewRookMoveGen() *RookMoveGen {
 	rmg := &RookMoveGen{}
 	rmg.attackCandidateTable = rmg.generateAttackCandidateTable()
 	rmg.relevantBitsTable = rmg.generateRelevantBitsTable(rmg.attackCandidateTable)

@@ -5,19 +5,21 @@ import (
 	"github.com/notmalte/psce/internal/constants"
 )
 
-type KnightMoveGen struct{}
+type KnightMoveGen struct {
+	attackTable [64]uint64
+}
 
-func (kmg *KnightMoveGen) GenerateAttackTable() [64]uint64 {
+func (kmg *KnightMoveGen) generateAttackTable() [64]uint64 {
 	table := [64]uint64{}
 
 	for square := range uint8(64) {
-		table[square] = kmg.MaskAttacks(square)
+		table[square] = kmg.maskAttacks(square)
 	}
 
 	return table
 }
 
-func (kmg *KnightMoveGen) MaskAttacks(square uint8) uint64 {
+func (kmg *KnightMoveGen) maskAttacks(square uint8) uint64 {
 	attacks := uint64(0)
 	bb := uint64(0)
 	bitboard.SetBit(&bb, square)
@@ -32,4 +34,15 @@ func (kmg *KnightMoveGen) MaskAttacks(square uint8) uint64 {
 	attacks |= (bb << 17) & constants.NotFileA
 
 	return attacks
+}
+
+func (kmg *KnightMoveGen) GetAttacks(square uint8) uint64 {
+	return kmg.attackTable[square]
+}
+
+func NewKnightMoveGen() *KnightMoveGen {
+	kmg := &KnightMoveGen{}
+	kmg.attackTable = kmg.generateAttackTable()
+
+	return kmg
 }

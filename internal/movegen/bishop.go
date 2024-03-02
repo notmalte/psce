@@ -158,7 +158,7 @@ func (bmg *BishopMoveGen) generateAttackTable(candidateTable [64]uint64, magicNu
 	return attackTable
 }
 
-func (bmg *BishopMoveGen) getAttacks(square uint8, occupancy uint64) uint64 {
+func (bmg *BishopMoveGen) GetAttacks(square uint8, occupancy uint64) uint64 {
 	maskedOccupancy := occupancy & bmg.attackCandidateTable[square]
 	magicNumber := bmg.magicNumbers[square]
 	relevantBits := bmg.relevantBitsTable[square]
@@ -168,7 +168,7 @@ func (bmg *BishopMoveGen) getAttacks(square uint8, occupancy uint64) uint64 {
 	return bmg.attackTable[square][magicIndex]
 }
 
-func newBishopMoveGen() *BishopMoveGen {
+func NewBishopMoveGen() *BishopMoveGen {
 	bmg := &BishopMoveGen{}
 	bmg.attackCandidateTable = bmg.generateAttackCandidateTable()
 	bmg.relevantBitsTable = bmg.generateRelevantBitsTable(bmg.attackCandidateTable)
