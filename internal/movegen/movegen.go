@@ -85,3 +85,11 @@ func (mg *MoveGen) IsSquareAttacked(pos *position.Position, square uint8, attack
 
 	return false
 }
+
+func (mg *MoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move {
+	moves := []Move{}
+
+	moves = append(moves, mg.PawnMoveGen.GeneratePseudoLegalMoves(pos)...)
+
+	return moves
+}

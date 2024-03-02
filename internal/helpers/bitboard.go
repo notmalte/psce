@@ -9,7 +9,7 @@ import (
 
 func SquareString(square uint8) string {
 	row, col := bitboard.IndexToRowCol(square)
-	return fmt.Sprintf("%c%d", 'A'+col, 8-row)
+	return fmt.Sprintf("%c%d", 'a'+col, 8-row)
 }
 
 var ErrInvalidSquare = errors.New("invalid square")
@@ -19,7 +19,7 @@ func StringToSquare(s string) (uint8, error) {
 		return constants.NoSquare, ErrInvalidSquare
 	}
 
-	col := s[0] - 'A'
+	col := s[0] - 'a'
 	row := 8 - (s[1] - '0')
 
 	if col < 0 || col > 7 || row < 0 || row > 7 {

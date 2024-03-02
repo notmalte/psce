@@ -49,7 +49,7 @@ func (pos *Position) String() string {
 		s += "\n"
 	}
 
-	s += "  A B C D E F G H\n\n"
+	s += "  a b c d e f g h\n\n"
 
 	s += fmt.Sprintf("Color to move: %s\n", helpers.ColorString(pos.ColorToMove))
 	if pos.EnPassantSquare != constants.NoSquare {

@@ -57,7 +57,7 @@ func String(bb uint64) string {
 		s += "\n"
 	}
 
-	s += "  A B C D E F G H\n"
+	s += "  a b c d e f g h\n"
 
 	return s
 }
