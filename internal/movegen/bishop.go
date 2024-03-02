@@ -2,6 +2,8 @@ package movegen
 
 import (
 	"github.com/notmalte/psce/internal/bitboard"
+	"github.com/notmalte/psce/internal/constants"
+	"github.com/notmalte/psce/internal/position"
 	"math/bits"
 )
 
@@ -176,4 +178,49 @@ func NewBishopMoveGen() *BishopMoveGen {
 	bmg.attackTable = bmg.generateAttackTable(bmg.attackCandidateTable, bmg.magicNumbers)
 
 	return bmg
+}
+
+func (bmg *BishopMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move {
+	isWhite := pos.ColorToMove == constants.ColorWhite
+
+	var otherColor uint8
+	var piece uint8
+	if isWhite {
+		otherColor = constants.ColorBlack
+		piece = constants.WhiteBishop
+	} else {
+		otherColor = constants.ColorWhite
+		piece = constants.BlackBishop
+	}
+
+	moves := []Move{}
+	bb := pos.PieceBitboards[piece]
+
+	for bb != 0 {
+		fromSquare := uint8(bits.TrailingZeros64(bb))
+
+		attacks := bmg.GetAttacks(fromSquare, pos.ColorBitboards[constants.ColorBoth]) & ^pos.ColorBitboards[pos.ColorToMove]
+
+		for attacks != 0 {
+			toSquare := uint8(bits.TrailingZeros64(attacks))
+
+			flags := FlagNone
+			if bitboard.GetBit(pos.ColorBitboards[otherColor], toSquare) {
+				flags = FlagCapture
+			}
+
+			moves = append(moves, Move{
+				FromSquare: fromSquare,
+				ToSquare:   toSquare,
+				Piece:      piece,
+				Flags:      flags,
+			})
+
+			bitboard.ClearBit(&attacks, toSquare)
+		}
+
+		bitboard.ClearBit(&bb, fromSquare)
+	}
+
+	return moves
 }

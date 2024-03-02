@@ -90,6 +90,10 @@ func (mg *MoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move {
 	moves := []Move{}
 
 	moves = append(moves, mg.PawnMoveGen.GeneratePseudoLegalMoves(pos)...)
+	moves = append(moves, mg.KnightMoveGen.GeneratePseudoLegalMoves(pos)...)
+	moves = append(moves, mg.BishopMoveGen.GeneratePseudoLegalMoves(pos)...)
+	moves = append(moves, mg.RookMoveGen.GeneratePseudoLegalMoves(pos)...)
+	moves = append(moves, mg.QueenMoveGen.GeneratePseudoLegalMoves(pos)...)
 	moves = append(moves, mg.KingMoveGen.GeneratePseudoLegalMoves(pos, mg)...)
 
 	return moves
