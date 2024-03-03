@@ -99,3 +99,25 @@ func (mg *MoveGen) GeneratePseudoLegalMoves(pos *position.Position) []move.Move 
 
 	return moves
 }
+
+type MoveWithNewPosition struct {
+	Move     move.Move
+	Position position.Position
+}
+
+func (mg *MoveGen) GenerateLegalMovesExpensive(pos *position.Position) []MoveWithNewPosition {
+	legalMoves := []MoveWithNewPosition{}
+	pseudoLegalMoves := mg.GeneratePseudoLegalMoves(pos)
+
+	for _, pseudoLegalMove := range pseudoLegalMoves {
+		newPos := pos.MakeMove(mg, &pseudoLegalMove, false)
+		if newPos != nil {
+			legalMoves = append(legalMoves, MoveWithNewPosition{
+				Move:     pseudoLegalMove,
+				Position: *newPos,
+			})
+		}
+	}
+
+	return legalMoves
+}

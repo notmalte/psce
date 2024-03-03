@@ -7,6 +7,7 @@ import (
 	"github.com/notmalte/psce/internal/constants"
 	"github.com/notmalte/psce/internal/helpers"
 	"github.com/notmalte/psce/internal/move"
+	"math/bits"
 	"strings"
 )
 
@@ -132,7 +133,7 @@ func Initial() *Position {
 	return pos
 }
 
-func (pos *Position) ApplyPseudoLegalMove(move *move.Move) {
+func (pos *Position) applyPseudoLegalMove(move *move.Move) {
 	isWhite := pos.ColorToMove == constants.ColorWhite
 
 	var opponentColor uint8
@@ -263,4 +264,32 @@ func (pos *Position) ApplyPseudoLegalMove(move *move.Move) {
 
 	pos.ColorBitboards[constants.ColorBoth] = pos.ColorBitboards[constants.ColorWhite] | pos.ColorBitboards[constants.ColorBlack]
 	pos.ColorToMove = opponentColor
+}
+
+type moveValidator interface {
+	IsSquareAttacked(pos *Position, square uint8, attackerColor uint8) bool
+}
+
+func (pos *Position) MakeMove(mv moveValidator, move *move.Move, onlyCaptures bool) *Position {
+	if onlyCaptures && !move.HasFlag(constants.MoveFlagCapture) {
+		return nil
+	}
+
+	clone := *pos
+	clone.applyPseudoLegalMove(move)
+
+	var kingPiece uint8
+	if pos.ColorToMove == constants.ColorWhite {
+		kingPiece = constants.WhiteKing
+	} else {
+		kingPiece = constants.BlackKing
+	}
+
+	kingSquare := uint8(bits.TrailingZeros64(clone.PieceBitboards[kingPiece]))
+
+	if mv.IsSquareAttacked(&clone, kingSquare, clone.ColorToMove) {
+		return nil
+	}
+
+	return &clone
 }
