@@ -159,7 +159,7 @@ func (rmg *RookMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []move.
 		piece = constants.WhiteRook
 	} else {
 		otherColor = constants.ColorWhite
-		piece = constants.WhiteKnight
+		piece = constants.BlackRook
 	}
 
 	moves := []move.Move{}
