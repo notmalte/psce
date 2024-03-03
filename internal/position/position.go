@@ -3,6 +3,7 @@ package position
 import (
 	"errors"
 	"fmt"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/notmalte/psce/internal/bitboard"
 	"github.com/notmalte/psce/internal/constants"
 	"github.com/notmalte/psce/internal/helpers"
@@ -60,6 +61,52 @@ func (pos *Position) String() string {
 		s += "En passant square: -\n"
 	}
 	s += fmt.Sprintf("Castling rights: %s", helpers.CastlingString(pos.CastlingRights))
+
+	return s
+}
+
+func (pos *Position) PrettyString() string {
+	infoStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#7f7f7f"))
+	brightSquareStyle := lipgloss.NewStyle().Background(lipgloss.Color("#d9d9d9")).Foreground(lipgloss.Color("#000000"))
+	darkSquareStyle := lipgloss.NewStyle().Background(lipgloss.Color("#8c8c8c")).Foreground(lipgloss.Color("#000000"))
+
+	s := ""
+
+	for row := range uint8(8) {
+		s += infoStyle.Render(fmt.Sprintf("%d ", 8-row))
+	outer:
+		for col := range uint8(8) {
+			index := bitboard.RowColToIndex(row, col)
+
+			for piece := range constants.PiecesCount {
+				if bitboard.GetBit(pos.PieceBitboards[piece], index) {
+					if (row+col)%2 == 0 {
+						s += brightSquareStyle.Render(fmt.Sprintf(" %s ", helpers.PieceStringUnicode(piece)))
+					} else {
+						s += darkSquareStyle.Render(fmt.Sprintf(" %s ", helpers.PieceStringUnicode(piece)))
+					}
+					continue outer
+				}
+			}
+
+			if (row+col)%2 == 0 {
+				s += brightSquareStyle.Render("   ")
+			} else {
+				s += darkSquareStyle.Render("   ")
+			}
+		}
+		s += "\n"
+	}
+
+	s += infoStyle.Render("   a  b  c  d  e  f  g  h") + "\n\n"
+
+	s += infoStyle.Render(fmt.Sprintf("Color to move: %s", helpers.ColorString(pos.ColorToMove))) + "\n"
+	if pos.EnPassantSquare != constants.NoSquare {
+		s += infoStyle.Render(fmt.Sprintf("En passant square: %s", helpers.SquareString(pos.EnPassantSquare))) + "\n"
+	} else {
+		s += infoStyle.Render("En passant square: -") + "\n"
+	}
+	s += infoStyle.Render(fmt.Sprintf("Castling rights: %s", helpers.CastlingString(pos.CastlingRights)))
 
 	return s
 }

@@ -36,6 +36,37 @@ func PieceString(piece uint8) string {
 	}
 }
 
+func PieceStringUnicode(piece uint8) string {
+	switch piece {
+	case constants.WhitePawn:
+		return "♙"
+	case constants.WhiteKnight:
+		return "♘"
+	case constants.WhiteBishop:
+		return "♗"
+	case constants.WhiteRook:
+		return "♖"
+	case constants.WhiteQueen:
+		return "♕"
+	case constants.WhiteKing:
+		return "♔"
+	case constants.BlackPawn:
+		return "♟"
+	case constants.BlackKnight:
+		return "♞"
+	case constants.BlackBishop:
+		return "♝"
+	case constants.BlackRook:
+		return "♜"
+	case constants.BlackQueen:
+		return "♛"
+	case constants.BlackKing:
+		return "♚"
+	default:
+		return "?"
+	}
+}
+
 func PieceColor(piece uint8) uint8 {
 	if piece < constants.BlackPawn {
 		return constants.ColorWhite
