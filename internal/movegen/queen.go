@@ -3,6 +3,7 @@ package movegen
 import (
 	"github.com/notmalte/psce/internal/bitboard"
 	"github.com/notmalte/psce/internal/constants"
+	"github.com/notmalte/psce/internal/move"
 	"github.com/notmalte/psce/internal/position"
 	"math/bits"
 )
@@ -23,7 +24,7 @@ func NewQueenMoveGen(rmg *RookMoveGen, bmg *BishopMoveGen) *QueenMoveGen {
 	}
 }
 
-func (qmg *QueenMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move {
+func (qmg *QueenMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []move.Move {
 	isWhite := pos.ColorToMove == constants.ColorWhite
 
 	var otherColor uint8
@@ -36,7 +37,7 @@ func (qmg *QueenMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move
 		piece = constants.BlackQueen
 	}
 
-	moves := []Move{}
+	moves := []move.Move{}
 	bb := pos.PieceBitboards[piece]
 
 	for bb != 0 {
@@ -47,12 +48,12 @@ func (qmg *QueenMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move
 		for attacks != 0 {
 			toSquare := uint8(bits.TrailingZeros64(attacks))
 
-			flags := FlagNone
+			flags := constants.MoveFlagNone
 			if bitboard.GetBit(pos.ColorBitboards[otherColor], toSquare) {
-				flags = FlagCapture
+				flags = constants.MoveFlagCapture
 			}
 
-			moves = append(moves, Move{
+			moves = append(moves, move.Move{
 				FromSquare: fromSquare,
 				ToSquare:   toSquare,
 				Piece:      piece,

@@ -1,7 +1,8 @@
-package movegen
+package move
 
 import (
 	"fmt"
+	"github.com/notmalte/psce/internal/constants"
 	"github.com/notmalte/psce/internal/helpers"
 )
 
@@ -13,16 +14,6 @@ type Move struct {
 	PromotionPiece uint8
 }
 
-const FlagNone uint8 = 0
-
-const (
-	FlagPromotion uint8 = 1 << iota
-	FlagCapture
-	FlagEnPassant
-	FlagCastle
-	FlagDoublePawnPush
-)
-
 func (m *Move) HasFlag(flag uint8) bool {
 	return m.Flags&flag != 0
 }
@@ -30,23 +21,23 @@ func (m *Move) HasFlag(flag uint8) bool {
 func (m *Move) String() string {
 	s := fmt.Sprintf("%s%s", helpers.SquareString(m.FromSquare), helpers.SquareString(m.ToSquare))
 
-	if m.HasFlag(FlagPromotion) {
+	if m.HasFlag(constants.MoveFlagPromotion) {
 		s += fmt.Sprintf(" [PROMOTION: %s]", helpers.PieceString(m.PromotionPiece))
 	}
 
-	if m.HasFlag(FlagCapture) {
+	if m.HasFlag(constants.MoveFlagCapture) {
 		s += " [CAPTURE]"
 	}
 
-	if m.HasFlag(FlagEnPassant) {
+	if m.HasFlag(constants.MoveFlagEnPassant) {
 		s += " [EN PASSANT]"
 	}
 
-	if m.HasFlag(FlagCastle) {
+	if m.HasFlag(constants.MoveFlagCastle) {
 		s += " [CASTLE]"
 	}
 
-	if m.HasFlag(FlagDoublePawnPush) {
+	if m.HasFlag(constants.MoveFlagDoublePawnPush) {
 		s += " [DOUBLE PAWN PUSH]"
 	}
 
@@ -56,7 +47,7 @@ func (m *Move) String() string {
 func (m *Move) UciString() string {
 	s := fmt.Sprintf("%s%s", helpers.SquareString(m.FromSquare), helpers.SquareString(m.ToSquare))
 
-	if m.HasFlag(FlagPromotion) {
+	if m.HasFlag(constants.MoveFlagPromotion) {
 		s += fmt.Sprintf("%s", helpers.PieceString(m.PromotionPiece))
 	}
 

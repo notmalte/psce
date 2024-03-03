@@ -3,6 +3,7 @@ package movegen
 import (
 	"github.com/notmalte/psce/internal/bitboard"
 	"github.com/notmalte/psce/internal/constants"
+	"github.com/notmalte/psce/internal/move"
 	"github.com/notmalte/psce/internal/position"
 	"math/bits"
 )
@@ -49,7 +50,7 @@ func NewPawnMoveGen() *PawnMoveGen {
 	return pmg
 }
 
-func (pmg *PawnMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move {
+func (pmg *PawnMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []move.Move {
 	isWhite := pos.ColorToMove == constants.ColorWhite
 
 	var otherColor uint8
@@ -74,7 +75,7 @@ func (pmg *PawnMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move 
 		homeRowEnd = constants.H7
 	}
 
-	moves := []Move{}
+	moves := []move.Move{}
 	bb := pos.PieceBitboards[piece]
 
 	/*
@@ -108,16 +109,16 @@ func (pmg *PawnMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move 
 				}
 
 				for _, promotionPiece := range promotionPieces {
-					moves = append(moves, Move{
+					moves = append(moves, move.Move{
 						FromSquare:     fromSquare,
 						ToSquare:       toSquare,
 						Piece:          piece,
-						Flags:          FlagPromotion,
+						Flags:          constants.MoveFlagPromotion,
 						PromotionPiece: promotionPiece,
 					})
 				}
 			} else {
-				moves = append(moves, Move{
+				moves = append(moves, move.Move{
 					FromSquare: fromSquare,
 					ToSquare:   toSquare,
 					Piece:      piece,
@@ -132,11 +133,11 @@ func (pmg *PawnMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move 
 					}
 
 					if !bitboard.GetBit(pos.ColorBitboards[constants.ColorBoth], doublePushSquare) {
-						moves = append(moves, Move{
+						moves = append(moves, move.Move{
 							FromSquare: fromSquare,
 							ToSquare:   doublePushSquare,
 							Piece:      piece,
-							Flags:      FlagDoublePawnPush,
+							Flags:      constants.MoveFlagDoublePawnPush,
 						})
 					}
 				}
@@ -158,20 +159,20 @@ func (pmg *PawnMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move 
 				}
 
 				for _, promotionPiece := range promotionPieces {
-					moves = append(moves, Move{
+					moves = append(moves, move.Move{
 						FromSquare:     fromSquare,
 						ToSquare:       toSquare,
 						Piece:          piece,
-						Flags:          FlagPromotion | FlagCapture,
+						Flags:          constants.MoveFlagPromotion | constants.MoveFlagCapture,
 						PromotionPiece: promotionPiece,
 					})
 				}
 			} else {
-				moves = append(moves, Move{
+				moves = append(moves, move.Move{
 					FromSquare: fromSquare,
 					ToSquare:   toSquare,
 					Piece:      piece,
-					Flags:      FlagCapture,
+					Flags:      constants.MoveFlagCapture,
 				})
 			}
 
@@ -180,11 +181,11 @@ func (pmg *PawnMoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move 
 
 		if pos.EnPassantSquare != constants.NoSquare {
 			if bitboard.GetBit(attacks, pos.EnPassantSquare) {
-				moves = append(moves, Move{
+				moves = append(moves, move.Move{
 					FromSquare: fromSquare,
 					ToSquare:   pos.EnPassantSquare,
 					Piece:      piece,
-					Flags:      FlagEnPassant | FlagCapture,
+					Flags:      constants.MoveFlagEnPassant | constants.MoveFlagCapture,
 				})
 			}
 		}

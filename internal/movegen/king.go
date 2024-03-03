@@ -3,6 +3,7 @@ package movegen
 import (
 	"github.com/notmalte/psce/internal/bitboard"
 	"github.com/notmalte/psce/internal/constants"
+	"github.com/notmalte/psce/internal/move"
 	"github.com/notmalte/psce/internal/position"
 	"math/bits"
 )
@@ -49,7 +50,7 @@ func NewKingMoveGen() *KingMoveGen {
 	return kmg
 }
 
-func (kmg *KingMoveGen) GeneratePseudoLegalMoves(pos *position.Position, mg *MoveGen) []Move {
+func (kmg *KingMoveGen) GeneratePseudoLegalMoves(pos *position.Position, mg *MoveGen) []move.Move {
 	isWhite := pos.ColorToMove == constants.ColorWhite
 
 	var otherColor uint8
@@ -68,7 +69,7 @@ func (kmg *KingMoveGen) GeneratePseudoLegalMoves(pos *position.Position, mg *Mov
 		queensideCastleFlag = constants.CastlingBlackQueenside
 	}
 
-	moves := []Move{}
+	moves := []move.Move{}
 	bb := pos.PieceBitboards[piece]
 
 	for bb != 0 {
@@ -79,12 +80,12 @@ func (kmg *KingMoveGen) GeneratePseudoLegalMoves(pos *position.Position, mg *Mov
 		for attacks != 0 {
 			toSquare := uint8(bits.TrailingZeros64(attacks))
 
-			flags := FlagNone
+			flags := constants.MoveFlagNone
 			if bitboard.GetBit(pos.ColorBitboards[otherColor], toSquare) {
-				flags = FlagCapture
+				flags = constants.MoveFlagCapture
 			}
 
-			moves = append(moves, Move{
+			moves = append(moves, move.Move{
 				FromSquare: fromSquare,
 				ToSquare:   toSquare,
 				Piece:      piece,
@@ -127,11 +128,11 @@ func (kmg *KingMoveGen) GeneratePseudoLegalMoves(pos *position.Position, mg *Mov
 			pos.ColorBitboards[constants.ColorBoth]&kingsideEmptyMask == 0 &&
 			!mg.IsSquareAttacked(pos, eSquare, otherColor) &&
 			!mg.IsSquareAttacked(pos, fSquare, otherColor) {
-			moves = append(moves, Move{
+			moves = append(moves, move.Move{
 				FromSquare: eSquare,
 				ToSquare:   gSquare,
 				Piece:      piece,
-				Flags:      FlagCastle,
+				Flags:      constants.MoveFlagCastle,
 			})
 		}
 
@@ -139,11 +140,11 @@ func (kmg *KingMoveGen) GeneratePseudoLegalMoves(pos *position.Position, mg *Mov
 			pos.ColorBitboards[constants.ColorBoth]&queensideEmptyMask == 0 &&
 			!mg.IsSquareAttacked(pos, eSquare, otherColor) &&
 			!mg.IsSquareAttacked(pos, dSquare, otherColor) {
-			moves = append(moves, Move{
+			moves = append(moves, move.Move{
 				FromSquare: eSquare,
 				ToSquare:   cSquare,
 				Piece:      piece,
-				Flags:      FlagCastle,
+				Flags:      constants.MoveFlagCastle,
 			})
 		}
 	}

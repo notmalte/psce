@@ -6,6 +6,7 @@ import (
 	"github.com/notmalte/psce/internal/bitboard"
 	"github.com/notmalte/psce/internal/constants"
 	"github.com/notmalte/psce/internal/helpers"
+	"github.com/notmalte/psce/internal/move"
 	"strings"
 )
 
@@ -129,4 +130,137 @@ func PositionFromFen(fen string) (*Position, error) {
 func Initial() *Position {
 	pos, _ := PositionFromFen(constants.InitialPositionFEN)
 	return pos
+}
+
+func (pos *Position) ApplyPseudoLegalMove(move *move.Move) {
+	isWhite := pos.ColorToMove == constants.ColorWhite
+
+	var opponentColor uint8
+	if isWhite {
+		opponentColor = constants.ColorBlack
+	} else {
+		opponentColor = constants.ColorWhite
+	}
+
+	bitboard.ClearBit(&pos.PieceBitboards[move.Piece], move.FromSquare)
+	bitboard.ClearBit(&pos.ColorBitboards[pos.ColorToMove], move.FromSquare)
+
+	if move.HasFlag(constants.MoveFlagPromotion) {
+		bitboard.SetBit(&pos.PieceBitboards[move.PromotionPiece], move.ToSquare)
+	} else {
+		bitboard.SetBit(&pos.PieceBitboards[move.Piece], move.ToSquare)
+	}
+	bitboard.SetBit(&pos.ColorBitboards[pos.ColorToMove], move.ToSquare)
+
+	if move.HasFlag(constants.MoveFlagCapture) {
+		if move.HasFlag(constants.MoveFlagEnPassant) {
+			var capturedPawnSquare uint8
+			var capturedPawnPiece uint8
+			if isWhite {
+				capturedPawnSquare = move.ToSquare + 8
+				capturedPawnPiece = constants.BlackPawn
+			} else {
+				capturedPawnSquare = move.ToSquare - 8
+				capturedPawnPiece = constants.WhitePawn
+			}
+
+			bitboard.ClearBit(&pos.PieceBitboards[capturedPawnPiece], capturedPawnSquare)
+			bitboard.ClearBit(&pos.ColorBitboards[opponentColor], capturedPawnSquare)
+		} else {
+			var opponentPieces [6]uint8
+			if isWhite {
+				opponentPieces = [6]uint8{constants.BlackPawn, constants.BlackKnight, constants.BlackBishop, constants.BlackRook, constants.BlackQueen, constants.BlackKing}
+			} else {
+				opponentPieces = [6]uint8{constants.WhitePawn, constants.WhiteKnight, constants.WhiteBishop, constants.WhiteRook, constants.WhiteQueen, constants.WhiteKing}
+			}
+
+			for _, piece := range opponentPieces {
+				bitboard.ClearBit(&pos.PieceBitboards[piece], move.ToSquare)
+			}
+			bitboard.ClearBit(&pos.ColorBitboards[opponentColor], move.ToSquare)
+
+			castlingMask := uint8(0)
+			switch move.ToSquare {
+			case constants.A8:
+				castlingMask = constants.CastlingBlackQueenside
+			case constants.H8:
+				castlingMask = constants.CastlingBlackKingside
+			case constants.A1:
+				castlingMask = constants.CastlingWhiteQueenside
+			case constants.H1:
+				castlingMask = constants.CastlingWhiteKingside
+			default:
+			}
+
+			pos.CastlingRights &= ^castlingMask
+		}
+	}
+
+	if move.HasFlag(constants.MoveFlagDoublePawnPush) {
+		if isWhite {
+			pos.EnPassantSquare = move.ToSquare + 8
+		} else {
+			pos.EnPassantSquare = move.ToSquare - 8
+		}
+	} else {
+		pos.EnPassantSquare = constants.NoSquare
+	}
+
+	if move.HasFlag(constants.MoveFlagCastle) {
+		var rookFromSquare uint8
+		var rookToSquare uint8
+		switch move.ToSquare {
+		case constants.C8:
+			rookFromSquare, rookToSquare = constants.A8, constants.D8
+		case constants.G8:
+			rookFromSquare, rookToSquare = constants.H8, constants.F8
+		case constants.C1:
+			rookFromSquare, rookToSquare = constants.A1, constants.D1
+		case constants.G1:
+			rookFromSquare, rookToSquare = constants.H1, constants.F1
+		default:
+			panic("Invalid castling move")
+		}
+
+		var rookPiece uint8
+		if isWhite {
+			rookPiece = constants.WhiteRook
+		} else {
+			rookPiece = constants.BlackRook
+		}
+
+		bitboard.ClearBit(&pos.PieceBitboards[rookPiece], rookFromSquare)
+		bitboard.ClearBit(&pos.ColorBitboards[pos.ColorToMove], rookFromSquare)
+
+		bitboard.SetBit(&pos.PieceBitboards[rookPiece], rookToSquare)
+		bitboard.SetBit(&pos.ColorBitboards[pos.ColorToMove], rookToSquare)
+
+		if isWhite {
+			pos.CastlingRights &= ^(constants.CastlingWhiteKingside | constants.CastlingWhiteQueenside)
+		} else {
+			pos.CastlingRights &= ^(constants.CastlingBlackKingside | constants.CastlingBlackQueenside)
+		}
+	} else {
+		castlingMask := uint8(0)
+		switch move.FromSquare {
+		case constants.A8:
+			castlingMask = constants.CastlingBlackQueenside
+		case constants.E8:
+			castlingMask = constants.CastlingBlackKingside | constants.CastlingBlackQueenside
+		case constants.H8:
+			castlingMask = constants.CastlingBlackKingside
+		case constants.A1:
+			castlingMask = constants.CastlingWhiteQueenside
+		case constants.E1:
+			castlingMask = constants.CastlingWhiteKingside | constants.CastlingWhiteQueenside
+		case constants.H1:
+			castlingMask = constants.CastlingWhiteKingside
+		default:
+		}
+
+		pos.CastlingRights &= ^castlingMask
+	}
+
+	pos.ColorBitboards[constants.ColorBoth] = pos.ColorBitboards[constants.ColorWhite] | pos.ColorBitboards[constants.ColorBlack]
+	pos.ColorToMove = opponentColor
 }

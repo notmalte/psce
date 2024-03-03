@@ -2,6 +2,7 @@ package movegen
 
 import (
 	"github.com/notmalte/psce/internal/constants"
+	"github.com/notmalte/psce/internal/move"
 	"github.com/notmalte/psce/internal/position"
 )
 
@@ -86,8 +87,8 @@ func (mg *MoveGen) IsSquareAttacked(pos *position.Position, square uint8, attack
 	return false
 }
 
-func (mg *MoveGen) GeneratePseudoLegalMoves(pos *position.Position) []Move {
-	moves := []Move{}
+func (mg *MoveGen) GeneratePseudoLegalMoves(pos *position.Position) []move.Move {
+	moves := []move.Move{}
 
 	moves = append(moves, mg.PawnMoveGen.GeneratePseudoLegalMoves(pos)...)
 	moves = append(moves, mg.KnightMoveGen.GeneratePseudoLegalMoves(pos)...)
