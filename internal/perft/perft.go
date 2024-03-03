@@ -7,27 +7,11 @@ import (
 	"time"
 )
 
-func RunPerft(mg *movegen.MoveGen, position *position.Position, depth uint, printInitialMoves bool) {
+func RunPerft(mg *movegen.MoveGen, position *position.Position, depth uint) {
 	fmt.Println("Running PERFT at depth", depth)
 
 	tStart := time.Now()
-	total := 0
-
-	if depth == 0 {
-		total = 1
-	} else {
-		moves := mg.GenerateLegalMovesExpensive(position)
-
-		for _, move := range moves {
-			nodes := countNodes(mg, &move.Position, depth-1)
-
-			total += nodes
-
-			if printInitialMoves {
-				fmt.Printf("%s: %d\n", move.Move.UciString(), nodes)
-			}
-		}
-	}
+	total := countNodes(mg, position, depth)
 
 	tEnd := time.Now()
 
@@ -46,10 +30,10 @@ func countNodes(mg *movegen.MoveGen, position *position.Position, depth uint) in
 	}
 
 	total := 0
-	moves := mg.GenerateLegalMovesExpensive(position)
+	nextPositions := mg.GenerateLegalNextPositions(position)
 
-	for _, move := range moves {
-		total += countNodes(mg, &move.Position, depth-1)
+	for _, nextPosition := range nextPositions {
+		total += countNodes(mg, nextPosition, depth-1)
 	}
 
 	return total

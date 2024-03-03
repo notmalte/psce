@@ -12,6 +12,6 @@ func main() {
 	mg := movegen.NewMoveGen()
 
 	for depth := uint(1); depth <= 5; depth++ {
-		perft.RunPerft(mg, pos, depth, false)
+		perft.RunPerft(mg, pos, depth)
 	}
 }
