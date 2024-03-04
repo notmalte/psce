@@ -38,7 +38,17 @@ func main() {
 	for {
 		legalMoves := mg.GenerateLegalMoves(pos)
 		if len(legalMoves) == 0 {
-			fmt.Println("Checkmate or stalemate!")
+			whiteKingSquare := uint8(bits.TrailingZeros64(pos.PieceBitboards[constants.WhiteKing]))
+			blackKingSquare := uint8(bits.TrailingZeros64(pos.PieceBitboards[constants.BlackKing]))
+
+			if mg.IsSquareAttacked(pos, whiteKingSquare, constants.ColorBlack) {
+				fmt.Println("Black wins by checkmate!")
+			} else if mg.IsSquareAttacked(pos, blackKingSquare, constants.ColorWhite) {
+				fmt.Println("White wins by checkmate!")
+			} else {
+				fmt.Println("Draw by stalemate!")
+			}
+
 			return
 		}
 
