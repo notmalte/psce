@@ -6,11 +6,13 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/notmalte/psce/internal/constants"
 	"github.com/notmalte/psce/internal/eval"
 	"github.com/notmalte/psce/internal/move"
 	"github.com/notmalte/psce/internal/movegen"
 	"github.com/notmalte/psce/internal/position"
 	"github.com/notmalte/psce/internal/search"
+	"math/bits"
 	"time"
 )
 
@@ -31,18 +33,16 @@ func main() {
 	pos := position.Initial()
 	isUsersTurn := true
 
+	fmt.Println(pos.PrettyString(nil, constants.NoSquare) + "\n")
+
 	for {
-		fmt.Println(pos.PrettyString())
-
-		ev := eval.EvaluatePosition(pos)
-
-		fmt.Println(infoStyle.Render(fmt.Sprintf("Eval: %d\n", ev)))
-
 		legalMoves := mg.GenerateLegalMoves(pos)
 		if len(legalMoves) == 0 {
 			fmt.Println("Checkmate or stalemate!")
 			return
 		}
+
+		var moveFrom, moveTo uint8
 
 		if isUsersTurn {
 			validateInput := func(input string) error {
@@ -83,6 +83,9 @@ func main() {
 
 			pos = pos.MakeMove(mg, userMove, false)
 
+			moveFrom = userMove.FromSquare
+			moveTo = userMove.ToSquare
+
 			fmt.Printf("You played: %s\n\n", userMoveUci)
 		} else {
 			var bestScore int
@@ -103,8 +106,32 @@ func main() {
 
 			pos = pos.MakeMove(mg, bestMove, false)
 
+			moveFrom = bestMove.FromSquare
+			moveTo = bestMove.ToSquare
+
 			fmt.Printf("Computer played: %s (score: %d, took: %dms)\n\n", bestMove.UciString(), bestScore, ms)
 		}
+
+		var opponentColor uint8
+		var kingPiece uint8
+		if pos.ColorToMove == constants.ColorWhite {
+			opponentColor = constants.ColorBlack
+			kingPiece = constants.WhiteKing
+		} else {
+			opponentColor = constants.ColorWhite
+			kingPiece = constants.BlackKing
+		}
+
+		checkSquare := constants.NoSquare
+
+		kingSquare := uint8(bits.TrailingZeros64(pos.PieceBitboards[kingPiece]))
+		if mg.IsSquareAttacked(pos, kingSquare, opponentColor) {
+			checkSquare = kingSquare
+		}
+
+		ev := eval.EvaluatePosition(pos)
+		fmt.Println(pos.PrettyString([]uint8{moveFrom, moveTo}, checkSquare))
+		fmt.Println(infoStyle.Render(fmt.Sprintf("Eval: %d\n", ev)))
 
 		isUsersTurn = !isUsersTurn
 	}

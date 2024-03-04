@@ -65,10 +65,13 @@ func (pos *Position) String() string {
 	return s
 }
 
-func (pos *Position) PrettyString() string {
+func (pos *Position) PrettyString(highlightSquares []uint8, checkSquare uint8) string {
 	infoStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#7f7f7f"))
 	brightSquareStyle := lipgloss.NewStyle().Background(lipgloss.Color("#d9d9d9")).Foreground(lipgloss.Color("#000000"))
 	darkSquareStyle := lipgloss.NewStyle().Background(lipgloss.Color("#8c8c8c")).Foreground(lipgloss.Color("#000000"))
+	brightHighlightSquareStyle := lipgloss.NewStyle().Background(lipgloss.Color("#c6e48b")).Foreground(lipgloss.Color("#000000"))
+	darkHighlightSquareStyle := lipgloss.NewStyle().Background(lipgloss.Color("#98b06a")).Foreground(lipgloss.Color("#000000"))
+	checkSquareStyle := lipgloss.NewStyle().Background(lipgloss.Color("#bf6767")).Foreground(lipgloss.Color("#000000"))
 
 	s := ""
 
@@ -77,23 +80,43 @@ func (pos *Position) PrettyString() string {
 	outer:
 		for col := range uint8(8) {
 			index := bitboard.RowColToIndex(row, col)
+			var style lipgloss.Style
+
+			if checkSquare == index {
+				style = checkSquareStyle
+			} else {
+				isHighlighted := false
+
+				for _, square := range highlightSquares {
+					if square == index {
+						isHighlighted = true
+						break
+					}
+				}
+
+				if isHighlighted {
+					if (row+col)%2 == 0 {
+						style = brightHighlightSquareStyle
+					} else {
+						style = darkHighlightSquareStyle
+					}
+				} else {
+					if (row+col)%2 == 0 {
+						style = brightSquareStyle
+					} else {
+						style = darkSquareStyle
+					}
+				}
+			}
 
 			for piece := range constants.PiecesCount {
 				if bitboard.GetBit(pos.PieceBitboards[piece], index) {
-					if (row+col)%2 == 0 {
-						s += brightSquareStyle.Render(fmt.Sprintf(" %s ", helpers.PieceStringUnicode(piece)))
-					} else {
-						s += darkSquareStyle.Render(fmt.Sprintf(" %s ", helpers.PieceStringUnicode(piece)))
-					}
+					s += style.Render(fmt.Sprintf(" %s ", helpers.PieceStringUnicode(piece)))
 					continue outer
 				}
 			}
 
-			if (row+col)%2 == 0 {
-				s += brightSquareStyle.Render("   ")
-			} else {
-				s += darkSquareStyle.Render("   ")
-			}
+			s += style.Render("   ")
 		}
 		s += "\n"
 	}
