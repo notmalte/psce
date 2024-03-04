@@ -48,7 +48,7 @@ func (m *Move) UciString() string {
 	s := fmt.Sprintf("%s%s", helpers.SquareString(m.FromSquare), helpers.SquareString(m.ToSquare))
 
 	if m.HasFlag(constants.MoveFlagPromotion) {
-		s += fmt.Sprintf("%s", helpers.PieceString(m.PromotionPiece))
+		s += helpers.PieceString(m.PromotionPiece)
 	}
 
 	return s

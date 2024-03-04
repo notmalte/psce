@@ -19,12 +19,19 @@ func StringToSquare(s string) (uint8, error) {
 		return constants.NoSquare, ErrInvalidSquare
 	}
 
-	col := s[0] - 'a'
-	row := 8 - (s[1] - '0')
+	colStr := s[0]
+	rowStr := s[1]
 
-	if col < 0 || col > 7 || row < 0 || row > 7 {
+	if colStr < 'a' || colStr > 'h' || rowStr < '1' || rowStr > '8' {
 		return constants.NoSquare, ErrInvalidSquare
 	}
 
+	col := s[0] - 'a'
+	row := '8' - s[1]
+
 	return bitboard.RowColToIndex(row, col), nil
+}
+
+func GetMirrorSquare(square uint8) uint8 {
+	return (7-(square/8))*8 + square%8
 }
