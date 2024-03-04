@@ -10,7 +10,8 @@ import (
 	"github.com/notmalte/psce/internal/move"
 	"github.com/notmalte/psce/internal/movegen"
 	"github.com/notmalte/psce/internal/position"
-	"math/rand/v2"
+	"github.com/notmalte/psce/internal/search"
+	"time"
 )
 
 func main() {
@@ -23,7 +24,7 @@ func main() {
 
 	_ = spinner.
 		New().
-		Title("Preparing move generator").
+		Title("Preparing move generator...").
 		Action(initMoveGen).
 		Run()
 
@@ -84,11 +85,25 @@ func main() {
 
 			fmt.Printf("You played: %s\n\n", userMoveUci)
 		} else {
-			randomMove := legalMoves[rand.IntN(len(legalMoves))]
+			var bestScore int
+			var bestMove *move.Move
+			var ms int64
 
-			pos = pos.MakeMove(mg, &randomMove, false)
+			findBestMove := func() {
+				tStart := time.Now()
+				bestScore, bestMove = search.Search(mg, pos, 6)
+				ms = time.Since(tStart).Milliseconds()
+			}
 
-			fmt.Printf("Computer played: %s\n\n", randomMove.UciString())
+			_ = spinner.
+				New().
+				Title("Thinking...").
+				Action(findBestMove).
+				Run()
+
+			pos = pos.MakeMove(mg, bestMove, false)
+
+			fmt.Printf("Computer played: %s (score: %d, took: %dms)\n\n", bestMove.UciString(), bestScore, ms)
 		}
 
 		isUsersTurn = !isUsersTurn

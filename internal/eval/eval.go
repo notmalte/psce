@@ -29,6 +29,8 @@ func EvaluatePosition(pos *position.Position) int {
 	}
 }
 
+const CheckmateScore = 1_000_000
+
 func materialScore(piece uint8) int {
 	switch piece {
 	case constants.WhitePawn:
