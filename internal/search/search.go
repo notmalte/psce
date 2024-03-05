@@ -9,9 +9,41 @@ import (
 	"math/bits"
 )
 
+func quiescence(mg *movegen.MoveGen, pos *position.Position, alpha int, beta int) int {
+	ev := eval.EvaluatePosition(pos)
+
+	if ev >= beta {
+		return beta
+	}
+
+	if ev > alpha {
+		alpha = ev
+	}
+
+	pseudoMoves := mg.GeneratePseudoLegalMoves(pos)
+
+	for _, pseudoMove := range pseudoMoves {
+		newPos := pos.MakeMove(mg, &pseudoMove, true)
+
+		if newPos != nil {
+			ev := -quiescence(mg, newPos, -beta, -alpha)
+
+			if ev >= beta {
+				return beta
+			}
+
+			if ev > alpha {
+				alpha = ev
+			}
+		}
+	}
+
+	return alpha
+}
+
 func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int, beta int, ply int) int {
 	if depth == 0 {
-		return eval.EvaluatePosition(pos)
+		return quiescence(mg, pos, alpha, beta)
 	}
 
 	pseudoMoves := mg.GeneratePseudoLegalMoves(pos)
