@@ -363,3 +363,23 @@ func (pos *Position) MakeMove(mv moveValidator, move *move.Move, onlyCaptures bo
 
 	return &clone
 }
+
+func (pos *Position) GetMoveVictimPiece(m *move.Move) uint8 {
+	if m.HasFlag(constants.MoveFlagEnPassant) {
+		if m.Piece == constants.WhitePawn {
+			return constants.BlackPawn
+		} else {
+			return constants.WhitePawn
+		}
+	}
+
+	if m.HasFlag(constants.MoveFlagCapture) {
+		for piece := range constants.PiecesCount {
+			if bitboard.GetBit(pos.PieceBitboards[piece], m.ToSquare) {
+				return piece
+			}
+		}
+	}
+
+	panic("no victim piece")
+}

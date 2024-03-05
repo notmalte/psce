@@ -7,7 +7,62 @@ import (
 	"github.com/notmalte/psce/internal/movegen"
 	"github.com/notmalte/psce/internal/position"
 	"math/bits"
+	"slices"
 )
+
+func getPieceValueForSort(piece uint8) int {
+	switch piece {
+	case constants.WhitePawn, constants.BlackPawn:
+		return 1
+	case constants.WhiteKnight, constants.BlackKnight:
+		return 2
+	case constants.WhiteBishop, constants.BlackBishop:
+		return 3
+	case constants.WhiteRook, constants.BlackRook:
+		return 4
+	case constants.WhiteQueen, constants.BlackQueen:
+		return 5
+	case constants.WhiteKing, constants.BlackKing:
+		return 6
+	default:
+		panic("invalid piece")
+	}
+}
+
+func generateSortedPseudoLegalMoves(mg *movegen.MoveGen, pos *position.Position) []move.Move {
+	pseudoMoves := mg.GeneratePseudoLegalMoves(pos)
+
+	slices.SortFunc(pseudoMoves, func(a, b move.Move) int {
+		aCapture := a.HasFlag(constants.MoveFlagCapture)
+		bCapture := b.HasFlag(constants.MoveFlagCapture)
+
+		if !aCapture && !bCapture {
+			return 0
+		}
+
+		if !aCapture && bCapture {
+			return 1
+		}
+
+		if aCapture && !bCapture {
+			return -1
+		}
+
+		aVictimValue := getPieceValueForSort(pos.GetMoveVictimPiece(&a))
+		bVictimValue := getPieceValueForSort(pos.GetMoveVictimPiece(&b))
+
+		if aVictimValue != bVictimValue {
+			return bVictimValue - aVictimValue
+		}
+
+		aPieceValue := getPieceValueForSort(a.Piece)
+		bPieceValue := getPieceValueForSort(b.Piece)
+
+		return aPieceValue - bPieceValue
+	})
+
+	return pseudoMoves
+}
 
 func quiescence(mg *movegen.MoveGen, pos *position.Position, alpha int, beta int) int {
 	ev := eval.EvaluatePosition(pos)
@@ -20,7 +75,7 @@ func quiescence(mg *movegen.MoveGen, pos *position.Position, alpha int, beta int
 		alpha = ev
 	}
 
-	pseudoMoves := mg.GeneratePseudoLegalMoves(pos)
+	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos)
 
 	for _, pseudoMove := range pseudoMoves {
 		newPos := pos.MakeMove(mg, &pseudoMove, true)
@@ -46,7 +101,7 @@ func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int,
 		return quiescence(mg, pos, alpha, beta)
 	}
 
-	pseudoMoves := mg.GeneratePseudoLegalMoves(pos)
+	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos)
 
 	canMove := false
 
@@ -93,7 +148,7 @@ func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int,
 }
 
 func Search(mg *movegen.MoveGen, pos *position.Position, depth uint) (int, *move.Move) {
-	pseudoMoves := mg.GeneratePseudoLegalMoves(pos)
+	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos)
 
 	bestScore := -eval.CheckmateScore
 	var bestMove *move.Move
