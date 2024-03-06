@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/notmalte/psce/internal/constants"
-	"github.com/notmalte/psce/internal/eval"
 	"github.com/notmalte/psce/internal/move"
 	"github.com/notmalte/psce/internal/movegen"
 	"github.com/notmalte/psce/internal/position"
@@ -17,8 +15,6 @@ import (
 )
 
 func main() {
-	infoStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("#7f7f7f"))
-
 	var mg *movegen.MoveGen
 	initMoveGen := func() {
 		mg = movegen.NewMoveGen()
@@ -139,9 +135,7 @@ func main() {
 			checkSquare = kingSquare
 		}
 
-		ev := eval.EvaluatePosition(pos)
-		fmt.Println(pos.PrettyString([]uint8{moveFrom, moveTo}, checkSquare))
-		fmt.Println(infoStyle.Render(fmt.Sprintf("Eval: %d\n", ev)))
+		fmt.Println(pos.PrettyString([]uint8{moveFrom, moveTo}, checkSquare) + "\n")
 
 		isUsersTurn = !isUsersTurn
 	}

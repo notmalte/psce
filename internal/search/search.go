@@ -10,6 +10,10 @@ import (
 	"slices"
 )
 
+const MaxSearchDepth = 64
+
+type killerMovesArray [MaxSearchDepth][2]*move.Move
+
 func getPieceValueForSort(piece uint8) int {
 	switch piece {
 	case constants.WhitePawn, constants.BlackPawn:
@@ -29,10 +33,23 @@ func getPieceValueForSort(piece uint8) int {
 	}
 }
 
-func generateSortedPseudoLegalMoves(mg *movegen.MoveGen, pos *position.Position) []move.Move {
+func generateSortedPseudoLegalMoves(mg *movegen.MoveGen, pos *position.Position, ply int, killerMoves *killerMovesArray) []move.Move {
 	pseudoMoves := mg.GeneratePseudoLegalMoves(pos)
 
 	slices.SortFunc(pseudoMoves, func(a, b move.Move) int {
+		if killerMoves != nil {
+			aKiller := (killerMoves[ply][0] != nil && a == *killerMoves[ply][0]) || (killerMoves[ply][1] != nil && a == *killerMoves[ply][1])
+			bKiller := (killerMoves[ply][0] != nil && b == *killerMoves[ply][0]) || (killerMoves[ply][1] != nil && b == *killerMoves[ply][1])
+
+			if aKiller && !bKiller {
+				return -1
+			}
+
+			if !aKiller && bKiller {
+				return 1
+			}
+		}
+
 		aCapture := a.HasFlag(constants.MoveFlagCapture)
 		bCapture := b.HasFlag(constants.MoveFlagCapture)
 
@@ -75,7 +92,7 @@ func quiescence(mg *movegen.MoveGen, pos *position.Position, alpha int, beta int
 		alpha = ev
 	}
 
-	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos)
+	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos, 0, nil)
 
 	for _, pseudoMove := range pseudoMoves {
 		newPos := pos.MakeMove(mg, &pseudoMove, true)
@@ -96,12 +113,12 @@ func quiescence(mg *movegen.MoveGen, pos *position.Position, alpha int, beta int
 	return alpha
 }
 
-func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int, beta int, ply int) int {
+func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int, beta int, ply int, killerMoves *killerMovesArray) int {
 	if depth == 0 {
 		return quiescence(mg, pos, alpha, beta)
 	}
 
-	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos)
+	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos, ply, killerMoves)
 
 	canMove := false
 
@@ -110,9 +127,16 @@ func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int,
 
 		if newPos != nil {
 			canMove = true
-			ev := -negamax(mg, newPos, depth-1, -beta, -alpha, ply+1)
+			ev := -negamax(mg, newPos, depth-1, -beta, -alpha, ply+1, killerMoves)
 
 			if ev >= beta {
+				if !pseudoMove.HasFlag(constants.MoveFlagCapture) &&
+					(killerMoves[ply][0] == nil || pseudoMove != *killerMoves[ply][0]) &&
+					(killerMoves[ply][1] == nil || pseudoMove != *killerMoves[ply][1]) {
+					killerMoves[ply][1] = killerMoves[ply][0]
+					killerMoves[ply][0] = &pseudoMove
+				}
+
 				return beta
 			}
 
@@ -148,7 +172,20 @@ func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int,
 }
 
 func Search(mg *movegen.MoveGen, pos *position.Position, depth uint) (int, *move.Move) {
-	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos)
+	if depth > MaxSearchDepth {
+		panic("search depth too high")
+	}
+
+	if depth < 1 {
+		panic("search depth too low")
+	}
+
+	killerMoves := &killerMovesArray{}
+	for i := range killerMoves {
+		killerMoves[i][0], killerMoves[i][1] = nil, nil
+	}
+
+	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos, 0, killerMoves)
 
 	bestScore := -eval.CheckmateScore
 	var bestMove *move.Move
@@ -157,7 +194,7 @@ func Search(mg *movegen.MoveGen, pos *position.Position, depth uint) (int, *move
 		newPos := pos.MakeMove(mg, &pseudoMove, false)
 
 		if newPos != nil {
-			ev := -negamax(mg, newPos, depth-1, bestScore, eval.CheckmateScore, 1)
+			ev := -negamax(mg, newPos, depth-1, -eval.CheckmateScore, -bestScore, 1, killerMoves)
 
 			if ev > bestScore {
 				bestScore = ev
