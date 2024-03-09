@@ -383,3 +383,7 @@ func (pos *Position) GetMoveVictimPiece(m *move.Move) uint8 {
 
 	panic("no victim piece")
 }
+
+func (pos *Position) GetFirstPieceSquare(piece uint8) uint8 {
+	return uint8(bits.TrailingZeros64(pos.PieceBitboards[piece]))
+}

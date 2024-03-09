@@ -10,7 +10,6 @@ import (
 	"github.com/notmalte/psce/internal/movegen"
 	"github.com/notmalte/psce/internal/position"
 	"github.com/notmalte/psce/internal/search"
-	"math/bits"
 	"time"
 )
 
@@ -34,8 +33,8 @@ func Run() {
 	for {
 		legalMoves := mg.GenerateLegalMoves(pos)
 		if len(legalMoves) == 0 {
-			whiteKingSquare := uint8(bits.TrailingZeros64(pos.PieceBitboards[constants.WhiteKing]))
-			blackKingSquare := uint8(bits.TrailingZeros64(pos.PieceBitboards[constants.BlackKing]))
+			whiteKingSquare := pos.GetFirstPieceSquare(constants.WhiteKing)
+			blackKingSquare := pos.GetFirstPieceSquare(constants.BlackKing)
 
 			if mg.IsSquareAttacked(pos, whiteKingSquare, constants.ColorBlack) {
 				fmt.Println("Black wins by checkmate!")
@@ -130,7 +129,7 @@ func Run() {
 
 		checkSquare := constants.NoSquare
 
-		kingSquare := uint8(bits.TrailingZeros64(pos.PieceBitboards[kingPiece]))
+		kingSquare := pos.GetFirstPieceSquare(kingPiece)
 		if mg.IsSquareAttacked(pos, kingSquare, opponentColor) {
 			checkSquare = kingSquare
 		}
