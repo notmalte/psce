@@ -4,6 +4,12 @@
 
 ![PSCE Screenshot](./screenshot.png)
 
+## Usage
+
+```sh
+go run ./cmd/psce
+```
+
 ## Features
 
 - Magic bitboard move generation
