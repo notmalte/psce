@@ -14,6 +14,26 @@ import (
 )
 
 func Run() {
+	var userColor uint8
+	err := huh.
+		NewSelect[uint8]().
+		Title("Choose your color").
+		Options(
+			huh.NewOption("White", constants.ColorWhite),
+			huh.NewOption("Black", constants.ColorBlack),
+		).
+		Value(&userColor).
+		Run()
+
+	if err != nil {
+		if errors.Is(err, huh.ErrUserAborted) {
+			fmt.Println("Exiting...")
+			return
+		}
+
+		panic(err)
+	}
+
 	var mg *movegen.MoveGen
 	initMoveGen := func() {
 		mg = movegen.NewMoveGen()
@@ -26,7 +46,7 @@ func Run() {
 		Run()
 
 	pos := position.Initial()
-	isUsersTurn := true
+	isUsersTurn := userColor == constants.ColorWhite
 
 	fmt.Println(pos.PrettyString(nil, constants.NoSquare) + "\n")
 
