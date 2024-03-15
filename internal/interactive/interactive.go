@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/notmalte/psce/internal/constants"
+	"github.com/notmalte/psce/internal/eval"
 	"github.com/notmalte/psce/internal/move"
 	"github.com/notmalte/psce/internal/movegen"
 	"github.com/notmalte/psce/internal/position"
@@ -115,11 +116,13 @@ func Run() {
 		} else {
 			var bestScore int
 			var bestMove *move.Move
+			var bestPv []*move.Move
+
 			var ms int64
 
 			findBestMove := func() {
 				tStart := time.Now()
-				bestScore, bestMove = search.Search(mg, pos, 6)
+				bestScore, bestMove, bestPv = search.Search(mg, pos, 6)
 				ms = time.Since(tStart).Milliseconds()
 			}
 
@@ -134,7 +137,20 @@ func Run() {
 			moveFrom = bestMove.FromSquare
 			moveTo = bestMove.ToSquare
 
-			fmt.Printf("Computer played: %s (score: %d, took: %dms)\n\n", bestMove.UciString(), bestScore, ms)
+			fmt.Printf("Computer played: %s (score: %d, took: %dms)\n", bestMove.UciString(), bestScore, ms)
+			if len(bestPv) != 0 {
+				fmt.Printf("Principal variation:")
+				for _, pvMove := range bestPv {
+					fmt.Printf(" %s", pvMove.UciString())
+				}
+				fmt.Println()
+			}
+
+			if bestScore+search.MaxSearchDepth >= eval.CheckmateScore {
+				fmt.Printf("Computer expects mate in %d move(s)\n", eval.CheckmateScore-bestScore)
+			}
+
+			fmt.Println()
 		}
 
 		var opponentColor uint8
