@@ -49,6 +49,13 @@ func Run() {
 	pos := position.Initial()
 	isUsersTurn := userColor == constants.ColorWhite
 
+	type historyEntry struct {
+		posBeforeMove *position.Position
+		move          *move.Move
+	}
+
+	history := []historyEntry{}
+
 	fmt.Println(pos.PrettyString(nil, constants.NoSquare) + "\n")
 
 	for {
@@ -72,6 +79,14 @@ func Run() {
 
 		if isUsersTurn {
 			validateInput := func(input string) error {
+				if input == "takeback" {
+					if len(history) < 2 {
+						return errors.New("no moves to take back")
+					}
+
+					return nil
+				}
+
 				for _, legalMove := range legalMoves {
 					if input == legalMove.UciString() {
 						return nil
@@ -99,20 +114,43 @@ func Run() {
 				panic(err)
 			}
 
-			var userMove *move.Move
-			for _, legalMove := range legalMoves {
-				if userMoveUci == legalMove.UciString() {
-					userMove = &legalMove
-					break
+			if userMoveUci == "takeback" {
+				pos = history[len(history)-2].posBeforeMove
+
+				if len(history) > 2 {
+					opponentMove := history[len(history)-3].move
+
+					moveFrom = opponentMove.FromSquare
+					moveTo = opponentMove.ToSquare
+
+					fmt.Printf("Took back move - last opponent move was: %s\n\n", opponentMove.UciString())
+				} else {
+					moveFrom = constants.NoSquare
+					moveTo = constants.NoSquare
+
+					fmt.Printf("Took back move\n\n")
 				}
+
+				isUsersTurn = !isUsersTurn
+
+				history = history[:len(history)-2]
+			} else {
+				var userMove *move.Move
+				for _, legalMove := range legalMoves {
+					if userMoveUci == legalMove.UciString() {
+						userMove = &legalMove
+						break
+					}
+				}
+
+				history = append(history, historyEntry{posBeforeMove: pos, move: userMove})
+				pos = pos.MakeMove(mg, userMove, false)
+
+				moveFrom = userMove.FromSquare
+				moveTo = userMove.ToSquare
+
+				fmt.Printf("You played: %s\n\n", userMoveUci)
 			}
-
-			pos = pos.MakeMove(mg, userMove, false)
-
-			moveFrom = userMove.FromSquare
-			moveTo = userMove.ToSquare
-
-			fmt.Printf("You played: %s\n\n", userMoveUci)
 		} else {
 			var bestScore int
 			var bestMove *move.Move
@@ -132,6 +170,7 @@ func Run() {
 				Action(findBestMove).
 				Run()
 
+			history = append(history, historyEntry{posBeforeMove: pos, move: bestMove})
 			pos = pos.MakeMove(mg, bestMove, false)
 
 			moveFrom = bestMove.FromSquare
