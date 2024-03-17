@@ -185,32 +185,11 @@ func Search(mg *movegen.MoveGen, pos *position.Position, depth uint) (int, *move
 		panic("search depth too low")
 	}
 
-	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos, 0, nil)
-
-	bestScore := -eval.CheckmateScore
-	var bestMove *move.Move
-	var bestPv []*move.Move
-
-	for _, pseudoMove := range pseudoMoves {
-		newPos := pos.MakeMove(mg, &pseudoMove, false)
-
-		if newPos != nil {
-			killerMoves := &killerMovesArray{}
-			for i := range killerMoves {
-				killerMoves[i][0], killerMoves[i][1] = nil, nil
-			}
-
-			evNeg, childPv := negamax(mg, newPos, depth-1, -eval.CheckmateScore, -bestScore, 1, killerMoves)
-
-			ev := -evNeg
-
-			if ev > bestScore {
-				bestScore = ev
-				bestMove = &pseudoMove
-				bestPv = childPv
-			}
-		}
+	killerMoves := &killerMovesArray{}
+	for i := range killerMoves {
+		killerMoves[i][0], killerMoves[i][1] = nil, nil
 	}
+	score, pv := negamax(mg, pos, depth, -eval.CheckmateScore, eval.CheckmateScore, 0, killerMoves)
 
-	return bestScore, bestMove, bestPv
+	return score, pv[0], pv
 }
