@@ -187,12 +187,12 @@ func Search(mg *movegen.MoveGen, pos *position.Position, minSearchDuration time.
 	var score int
 	var pv []*move.Move
 
-	killerMoves := &killerMovesArray{}
-	for i := range killerMoves {
-		killerMoves[i][0], killerMoves[i][1] = nil, nil
-	}
-
 	for depth := uint(1); depth <= MaxSearchDepth; depth++ {
+		killerMoves := &killerMovesArray{}
+		for i := range killerMoves {
+			killerMoves[i][0], killerMoves[i][1] = nil, nil
+		}
+
 		score, pv = negamax(mg, pos, depth, -eval.CheckmateScore, eval.CheckmateScore, 0, killerMoves)
 
 		if time.Since(tStart) >= minSearchDuration {
