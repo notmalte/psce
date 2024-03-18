@@ -8,6 +8,7 @@ import (
 	"github.com/notmalte/psce/internal/position"
 	"math/bits"
 	"slices"
+	"time"
 )
 
 const MaxSearchDepth = 64
@@ -176,20 +177,32 @@ func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int,
 	return alpha, pv
 }
 
-func Search(mg *movegen.MoveGen, pos *position.Position, depth uint) (int, *move.Move, []*move.Move) {
-	if depth > MaxSearchDepth {
-		panic("search depth too high")
+func Search(mg *movegen.MoveGen, pos *position.Position, minSearchDuration time.Duration) (int, *move.Move, []*move.Move) {
+	if minSearchDuration <= 0 {
+		panic("min search duration must be positive")
 	}
 
-	if depth < 1 {
-		panic("search depth too low")
-	}
+	tStart := time.Now()
+
+	var score int
+	var pv []*move.Move
 
 	killerMoves := &killerMovesArray{}
 	for i := range killerMoves {
 		killerMoves[i][0], killerMoves[i][1] = nil, nil
 	}
-	score, pv := negamax(mg, pos, depth, -eval.CheckmateScore, eval.CheckmateScore, 0, killerMoves)
+
+	for depth := uint(1); depth <= MaxSearchDepth; depth++ {
+		score, pv = negamax(mg, pos, depth, -eval.CheckmateScore, eval.CheckmateScore, 0, killerMoves)
+
+		if time.Since(tStart) >= minSearchDuration {
+			break
+		}
+
+		if score >= eval.CheckmateScore-MaxSearchDepth {
+			break
+		}
+	}
 
 	return score, pv[0], pv
 }

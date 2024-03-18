@@ -160,7 +160,7 @@ func Run() {
 
 			findBestMove := func() {
 				tStart := time.Now()
-				bestScore, bestMove, bestPv = search.Search(mg, pos, 6)
+				bestScore, bestMove, bestPv = search.Search(mg, pos, 1*time.Second)
 				ms = time.Since(tStart).Milliseconds()
 			}
 
