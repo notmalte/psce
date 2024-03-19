@@ -34,10 +34,22 @@ func getPieceValueForSort(piece uint8) int {
 	}
 }
 
-func generateSortedPseudoLegalMoves(mg *movegen.MoveGen, pos *position.Position, ply int, killerMoves *killerMovesArray) []move.Move {
+func generateSortedPseudoLegalMoves(mg *movegen.MoveGen, pos *position.Position, ply int, killerMoves *killerMovesArray, prevPv []*move.Move) []move.Move {
 	pseudoMoves := mg.GeneratePseudoLegalMoves(pos)
 
 	slices.SortFunc(pseudoMoves, func(a, b move.Move) int {
+		if prevPv != nil && ply < len(prevPv) {
+			pvMove := prevPv[ply]
+
+			if a == *pvMove {
+				return -1
+			}
+
+			if b == *pvMove {
+				return 1
+			}
+		}
+
 		if killerMoves != nil {
 			aKiller := (killerMoves[ply][0] != nil && a == *killerMoves[ply][0]) || (killerMoves[ply][1] != nil && a == *killerMoves[ply][1])
 			bKiller := (killerMoves[ply][0] != nil && b == *killerMoves[ply][0]) || (killerMoves[ply][1] != nil && b == *killerMoves[ply][1])
@@ -93,7 +105,7 @@ func quiescence(mg *movegen.MoveGen, pos *position.Position, alpha int, beta int
 		alpha = ev
 	}
 
-	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos, 0, nil)
+	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos, 0, nil, nil)
 
 	for _, pseudoMove := range pseudoMoves {
 		newPos := pos.MakeMove(mg, &pseudoMove, true)
@@ -114,12 +126,12 @@ func quiescence(mg *movegen.MoveGen, pos *position.Position, alpha int, beta int
 	return alpha
 }
 
-func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int, beta int, ply int, killerMoves *killerMovesArray) (int, []*move.Move) {
+func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int, beta int, ply int, killerMoves *killerMovesArray, prevPv []*move.Move) (int, []*move.Move) {
 	if depth == 0 {
 		return quiescence(mg, pos, alpha, beta), []*move.Move{}
 	}
 
-	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos, ply, killerMoves)
+	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos, ply, killerMoves, prevPv)
 
 	canMove := false
 
@@ -130,7 +142,7 @@ func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int,
 
 		if newPos != nil {
 			canMove = true
-			evNeg, childPv := negamax(mg, newPos, depth-1, -beta, -alpha, ply+1, killerMoves)
+			evNeg, childPv := negamax(mg, newPos, depth-1, -beta, -alpha, ply+1, killerMoves, prevPv)
 
 			ev := -evNeg
 
@@ -193,7 +205,7 @@ func Search(mg *movegen.MoveGen, pos *position.Position, minSearchDuration time.
 			killerMoves[i][0], killerMoves[i][1] = nil, nil
 		}
 
-		score, pv = negamax(mg, pos, depth, -eval.CheckmateScore, eval.CheckmateScore, 0, killerMoves)
+		score, pv = negamax(mg, pos, depth, -eval.CheckmateScore, eval.CheckmateScore, 0, killerMoves, pv)
 
 		if time.Since(tStart) >= minSearchDuration {
 			break
