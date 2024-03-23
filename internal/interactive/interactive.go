@@ -11,6 +11,7 @@ import (
 	"github.com/notmalte/psce/internal/movegen"
 	"github.com/notmalte/psce/internal/position"
 	"github.com/notmalte/psce/internal/search"
+	"github.com/notmalte/psce/internal/zobrist"
 	"time"
 )
 
@@ -36,14 +37,16 @@ func Run() {
 	}
 
 	var mg *movegen.MoveGen
-	initMoveGen := func() {
+	var _ *zobrist.Keys
+	initMoveGenAndZobrist := func() {
 		mg = movegen.NewMoveGen()
+		_ = zobrist.NewKeys()
 	}
 
 	_ = spinner.
 		New().
-		Title("Preparing move generator...").
-		Action(initMoveGen).
+		Title("Preparing move generator and Zobrist keys...").
+		Action(initMoveGenAndZobrist).
 		Run()
 
 	pos := position.Initial()
