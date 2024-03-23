@@ -37,10 +37,10 @@ func Run() {
 	}
 
 	var mg *movegen.MoveGen
-	var _ *zobrist.Keys
+	var zk *zobrist.Keys
 	initMoveGenAndZobrist := func() {
 		mg = movegen.NewMoveGen()
-		_ = zobrist.NewKeys()
+		zk = zobrist.NewKeys()
 	}
 
 	_ = spinner.
@@ -50,6 +50,8 @@ func Run() {
 		Run()
 
 	pos := position.Initial()
+	hash := zk.GenerateHash(pos)
+
 	isUsersTurn := userColor == constants.ColorWhite
 
 	type historyEntry struct {
@@ -147,7 +149,24 @@ func Run() {
 				}
 
 				history = append(history, historyEntry{posBeforeMove: pos, move: userMove})
-				pos = pos.MakeMove(mg, userMove, false)
+				newPos := pos.MakeMove(mg, userMove, false)
+
+				fmt.Printf("Previous hash: %d\n", hash)
+
+				t0Incr := time.Now()
+				incrHash := zk.IncrementalHash(hash, pos, newPos, userMove)
+				fmt.Printf("Incremental hash: %d (took: %dns)\n", incrHash, time.Since(t0Incr).Nanoseconds())
+
+				t0Fresh := time.Now()
+				freshHash := zk.GenerateHash(newPos)
+				fmt.Printf("Fresh hash: %d (took: %dns)\n", freshHash, time.Since(t0Fresh).Nanoseconds())
+
+				if freshHash != incrHash {
+					panic("Hash mismatch")
+				}
+
+				hash = incrHash
+				pos = newPos
 
 				moveFrom = userMove.FromSquare
 				moveTo = userMove.ToSquare
@@ -174,7 +193,26 @@ func Run() {
 				Run()
 
 			history = append(history, historyEntry{posBeforeMove: pos, move: bestMove})
-			pos = pos.MakeMove(mg, bestMove, false)
+			newPos := pos.MakeMove(mg, bestMove, false)
+
+			fmt.Printf("Previous hash: %d\n", hash)
+
+			t0Incr := time.Now()
+			incrHash := zk.IncrementalHash(hash, pos, newPos, bestMove)
+			fmt.Printf("Incremental hash: %d (took: %dns)\n", incrHash, time.Since(t0Incr).Nanoseconds())
+
+			t0Fresh := time.Now()
+			freshHash := zk.GenerateHash(newPos)
+			fmt.Printf("Fresh hash: %d (took: %dns)\n", freshHash, time.Since(t0Fresh).Nanoseconds())
+
+			if freshHash != incrHash {
+				fmt.Println(bestMove.String())
+				fmt.Println(newPos.PrettyString(nil, constants.NoSquare))
+				panic("Hash mismatch")
+			}
+
+			hash = incrHash
+			pos = newPos
 
 			moveFrom = bestMove.FromSquare
 			moveTo = bestMove.ToSquare
