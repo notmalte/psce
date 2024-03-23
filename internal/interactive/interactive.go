@@ -52,7 +52,7 @@ func Run() {
 	pos := position.Initial()
 	hash := zk.GenerateHash(pos)
 
-	isUsersTurn := userColor == constants.ColorWhite
+	isUsersTurn := userColor == pos.ColorToMove
 
 	type historyEntry struct {
 		posBeforeMove *position.Position

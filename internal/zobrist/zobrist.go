@@ -78,14 +78,14 @@ func (k *Keys) IncrementalHash(hash uint64, oldPos *position.Position, newPos *p
 
 	hash ^= k.PieceSquare[m.Piece][m.FromSquare]
 
-	if m.HasFlag(constants.MoveFlagPromotion) {
+	if m.IsPromotion() {
 		hash ^= k.PieceSquare[m.PromotionPiece][m.ToSquare]
 	} else {
 		hash ^= k.PieceSquare[m.Piece][m.ToSquare]
 	}
 
-	if m.HasFlag(constants.MoveFlagCapture) {
-		if m.HasFlag(constants.MoveFlagEnPassant) {
+	if m.IsCapture() {
+		if m.IsEnPassant() {
 			var capturedPawnSquare uint8
 			var capturedPawnPiece uint8
 			if isWhite {
@@ -114,7 +114,7 @@ func (k *Keys) IncrementalHash(hash uint64, oldPos *position.Position, newPos *p
 		}
 	}
 
-	if m.HasFlag(constants.MoveFlagCastle) {
+	if m.IsCastle() {
 		var rookFromSquare uint8
 		var rookToSquare uint8
 		switch m.ToSquare {

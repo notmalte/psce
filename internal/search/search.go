@@ -63,8 +63,8 @@ func generateSortedPseudoLegalMoves(mg *movegen.MoveGen, pos *position.Position,
 			}
 		}
 
-		aCapture := a.HasFlag(constants.MoveFlagCapture)
-		bCapture := b.HasFlag(constants.MoveFlagCapture)
+		aCapture := a.IsCapture()
+		bCapture := b.IsCapture()
 
 		if !aCapture && !bCapture {
 			return 0
@@ -147,7 +147,7 @@ func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int,
 			ev := -evNeg
 
 			if ev >= beta {
-				if !pseudoMove.HasFlag(constants.MoveFlagCapture) &&
+				if !pseudoMove.IsCapture() &&
 					(killerMoves[ply][0] == nil || pseudoMove != *killerMoves[ply][0]) &&
 					(killerMoves[ply][1] == nil || pseudoMove != *killerMoves[ply][1]) {
 					killerMoves[ply][1] = killerMoves[ply][0]

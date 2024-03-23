@@ -216,15 +216,15 @@ func (pos *Position) applyPseudoLegalMove(move *move.Move) {
 	bitboard.ClearBit(&pos.PieceBitboards[move.Piece], move.FromSquare)
 	bitboard.ClearBit(&pos.ColorBitboards[pos.ColorToMove], move.FromSquare)
 
-	if move.HasFlag(constants.MoveFlagPromotion) {
+	if move.IsPromotion() {
 		bitboard.SetBit(&pos.PieceBitboards[move.PromotionPiece], move.ToSquare)
 	} else {
 		bitboard.SetBit(&pos.PieceBitboards[move.Piece], move.ToSquare)
 	}
 	bitboard.SetBit(&pos.ColorBitboards[pos.ColorToMove], move.ToSquare)
 
-	if move.HasFlag(constants.MoveFlagCapture) {
-		if move.HasFlag(constants.MoveFlagEnPassant) {
+	if move.IsCapture() {
+		if move.IsEnPassant() {
 			var capturedPawnSquare uint8
 			var capturedPawnPiece uint8
 			if isWhite {
@@ -267,7 +267,7 @@ func (pos *Position) applyPseudoLegalMove(move *move.Move) {
 		}
 	}
 
-	if move.HasFlag(constants.MoveFlagDoublePawnPush) {
+	if move.IsDoublePawnPush() {
 		if isWhite {
 			pos.EnPassantSquare = move.ToSquare + 8
 		} else {
@@ -277,7 +277,7 @@ func (pos *Position) applyPseudoLegalMove(move *move.Move) {
 		pos.EnPassantSquare = constants.NoSquare
 	}
 
-	if move.HasFlag(constants.MoveFlagCastle) {
+	if move.IsCastle() {
 		var rookFromSquare uint8
 		var rookToSquare uint8
 		switch move.ToSquare {
@@ -341,7 +341,7 @@ type moveValidator interface {
 }
 
 func (pos *Position) MakeMove(mv moveValidator, move *move.Move, onlyCaptures bool) *Position {
-	if onlyCaptures && !move.HasFlag(constants.MoveFlagCapture) {
+	if onlyCaptures && !move.IsCapture() {
 		return nil
 	}
 
@@ -365,7 +365,7 @@ func (pos *Position) MakeMove(mv moveValidator, move *move.Move, onlyCaptures bo
 }
 
 func (pos *Position) GetMoveVictimPiece(m *move.Move) uint8 {
-	if m.HasFlag(constants.MoveFlagEnPassant) {
+	if m.IsEnPassant() {
 		if m.Piece == constants.WhitePawn {
 			return constants.BlackPawn
 		} else {
@@ -373,7 +373,7 @@ func (pos *Position) GetMoveVictimPiece(m *move.Move) uint8 {
 		}
 	}
 
-	if m.HasFlag(constants.MoveFlagCapture) {
+	if m.IsCapture() {
 		for piece := range constants.PiecesCount {
 			if bitboard.GetBit(pos.PieceBitboards[piece], m.ToSquare) {
 				return piece
