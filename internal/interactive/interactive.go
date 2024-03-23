@@ -38,9 +38,14 @@ func Run() {
 
 	var mg *movegen.MoveGen
 	var zk *zobrist.Keys
+	var ctx *search.Context
 	initMoveGenAndZobrist := func() {
 		mg = movegen.NewMoveGen()
 		zk = zobrist.NewKeys()
+		ctx = &search.Context{
+			MoveGen:     mg,
+			ZobristKeys: zk,
+		}
 	}
 
 	_ = spinner.
@@ -182,7 +187,7 @@ func Run() {
 
 			findBestMove := func() {
 				tStart := time.Now()
-				bestScore, bestMove, bestPv = search.Search(mg, pos, 1*time.Second)
+				bestScore, bestMove, bestPv = search.Search(ctx, pos, 1*time.Second)
 				ms = time.Since(tStart).Milliseconds()
 			}
 
@@ -206,8 +211,6 @@ func Run() {
 			fmt.Printf("Fresh hash: %d (took: %dns)\n", freshHash, time.Since(t0Fresh).Nanoseconds())
 
 			if freshHash != incrHash {
-				fmt.Println(bestMove.String())
-				fmt.Println(newPos.PrettyString(nil, constants.NoSquare))
 				panic("Hash mismatch")
 			}
 

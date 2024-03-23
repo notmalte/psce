@@ -336,6 +336,7 @@ func (pos *Position) applyPseudoLegalMove(move *move.Move) {
 	pos.ColorToMove = opponentColor
 }
 
+// just to prevent cyclic imports
 type moveValidator interface {
 	IsSquareAttacked(pos *Position, square uint8, attackerColor uint8) bool
 }

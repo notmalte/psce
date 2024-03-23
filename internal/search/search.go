@@ -6,6 +6,7 @@ import (
 	"github.com/notmalte/psce/internal/move"
 	"github.com/notmalte/psce/internal/movegen"
 	"github.com/notmalte/psce/internal/position"
+	"github.com/notmalte/psce/internal/zobrist"
 	"math/bits"
 	"slices"
 	"time"
@@ -13,7 +14,17 @@ import (
 
 const MaxSearchDepth = 64
 
+type Context struct {
+	MoveGen     *movegen.MoveGen
+	ZobristKeys *zobrist.Keys
+}
+
 type killerMovesArray [MaxSearchDepth][2]*move.Move
+
+type sortingHeuristics struct {
+	killerMoves *killerMovesArray
+	prevPv      []*move.Move
+}
 
 func getPieceValueForSort(piece uint8) int {
 	switch piece {
@@ -34,32 +45,34 @@ func getPieceValueForSort(piece uint8) int {
 	}
 }
 
-func generateSortedPseudoLegalMoves(mg *movegen.MoveGen, pos *position.Position, ply int, killerMoves *killerMovesArray, prevPv []*move.Move) []move.Move {
+func generateSortedPseudoLegalMoves(mg *movegen.MoveGen, pos *position.Position, sh *sortingHeuristics, ply int) []move.Move {
 	pseudoMoves := mg.GeneratePseudoLegalMoves(pos)
 
 	slices.SortFunc(pseudoMoves, func(a, b move.Move) int {
-		if prevPv != nil && ply < len(prevPv) {
-			pvMove := prevPv[ply]
+		if sh != nil {
+			if sh.prevPv != nil && ply < len(sh.prevPv) {
+				pvMove := sh.prevPv[ply]
 
-			if a == *pvMove {
-				return -1
+				if a == *pvMove {
+					return -1
+				}
+
+				if b == *pvMove {
+					return 1
+				}
 			}
 
-			if b == *pvMove {
-				return 1
-			}
-		}
+			if sh.killerMoves != nil {
+				aKiller := (sh.killerMoves[ply][0] != nil && a == *sh.killerMoves[ply][0]) || (sh.killerMoves[ply][1] != nil && a == *sh.killerMoves[ply][1])
+				bKiller := (sh.killerMoves[ply][0] != nil && b == *sh.killerMoves[ply][0]) || (sh.killerMoves[ply][1] != nil && b == *sh.killerMoves[ply][1])
 
-		if killerMoves != nil {
-			aKiller := (killerMoves[ply][0] != nil && a == *killerMoves[ply][0]) || (killerMoves[ply][1] != nil && a == *killerMoves[ply][1])
-			bKiller := (killerMoves[ply][0] != nil && b == *killerMoves[ply][0]) || (killerMoves[ply][1] != nil && b == *killerMoves[ply][1])
+				if aKiller && !bKiller {
+					return -1
+				}
 
-			if aKiller && !bKiller {
-				return -1
-			}
-
-			if !aKiller && bKiller {
-				return 1
+				if !aKiller && bKiller {
+					return 1
+				}
 			}
 		}
 
@@ -94,7 +107,7 @@ func generateSortedPseudoLegalMoves(mg *movegen.MoveGen, pos *position.Position,
 	return pseudoMoves
 }
 
-func quiescence(mg *movegen.MoveGen, pos *position.Position, alpha int, beta int) int {
+func quiescence(ctx *Context, pos *position.Position, alpha int, beta int) int {
 	ev := eval.EvaluatePosition(pos)
 
 	if ev >= beta {
@@ -105,13 +118,13 @@ func quiescence(mg *movegen.MoveGen, pos *position.Position, alpha int, beta int
 		alpha = ev
 	}
 
-	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos, 0, nil, nil)
+	pseudoMoves := generateSortedPseudoLegalMoves(ctx.MoveGen, pos, nil, 0)
 
 	for _, pseudoMove := range pseudoMoves {
-		newPos := pos.MakeMove(mg, &pseudoMove, true)
+		newPos := pos.MakeMove(ctx.MoveGen, &pseudoMove, true)
 
 		if newPos != nil {
-			ev := -quiescence(mg, newPos, -beta, -alpha)
+			ev := -quiescence(ctx, newPos, -beta, -alpha)
 
 			if ev >= beta {
 				return beta
@@ -126,32 +139,32 @@ func quiescence(mg *movegen.MoveGen, pos *position.Position, alpha int, beta int
 	return alpha
 }
 
-func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int, beta int, ply int, killerMoves *killerMovesArray, prevPv []*move.Move) (int, []*move.Move) {
+func negamax(ctx *Context, pos *position.Position, sh *sortingHeuristics, depth uint, alpha int, beta int, ply int) (int, []*move.Move) {
 	if depth == 0 {
-		return quiescence(mg, pos, alpha, beta), []*move.Move{}
+		return quiescence(ctx, pos, alpha, beta), []*move.Move{}
 	}
 
-	pseudoMoves := generateSortedPseudoLegalMoves(mg, pos, ply, killerMoves, prevPv)
+	pseudoMoves := generateSortedPseudoLegalMoves(ctx.MoveGen, pos, sh, ply)
 
 	canMove := false
 
 	var pv []*move.Move
 
 	for _, pseudoMove := range pseudoMoves {
-		newPos := pos.MakeMove(mg, &pseudoMove, false)
+		newPos := pos.MakeMove(ctx.MoveGen, &pseudoMove, false)
 
 		if newPos != nil {
 			canMove = true
-			evNeg, childPv := negamax(mg, newPos, depth-1, -beta, -alpha, ply+1, killerMoves, prevPv)
+			evNeg, childPv := negamax(ctx, newPos, sh, depth-1, -beta, -alpha, ply+1)
 
 			ev := -evNeg
 
 			if ev >= beta {
 				if !pseudoMove.IsCapture() &&
-					(killerMoves[ply][0] == nil || pseudoMove != *killerMoves[ply][0]) &&
-					(killerMoves[ply][1] == nil || pseudoMove != *killerMoves[ply][1]) {
-					killerMoves[ply][1] = killerMoves[ply][0]
-					killerMoves[ply][0] = &pseudoMove
+					(sh.killerMoves[ply][0] == nil || pseudoMove != *sh.killerMoves[ply][0]) &&
+					(sh.killerMoves[ply][1] == nil || pseudoMove != *sh.killerMoves[ply][1]) {
+					sh.killerMoves[ply][1] = sh.killerMoves[ply][0]
+					sh.killerMoves[ply][0] = &pseudoMove
 				}
 
 				return beta, []*move.Move{&pseudoMove}
@@ -179,7 +192,7 @@ func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int,
 
 		kingSquare := uint8(bits.TrailingZeros64(pos.PieceBitboards[kingPiece]))
 
-		if mg.IsSquareAttacked(pos, kingSquare, opponentColor) {
+		if ctx.MoveGen.IsSquareAttacked(pos, kingSquare, opponentColor) {
 			return -eval.CheckmateScore + ply, []*move.Move{}
 		} else {
 			return 0, []*move.Move{}
@@ -189,7 +202,7 @@ func negamax(mg *movegen.MoveGen, pos *position.Position, depth uint, alpha int,
 	return alpha, pv
 }
 
-func Search(mg *movegen.MoveGen, pos *position.Position, minSearchDuration time.Duration) (int, *move.Move, []*move.Move) {
+func Search(ctx *Context, pos *position.Position, minSearchDuration time.Duration) (int, *move.Move, []*move.Move) {
 	if minSearchDuration <= 0 {
 		panic("min search duration must be positive")
 	}
@@ -205,7 +218,12 @@ func Search(mg *movegen.MoveGen, pos *position.Position, minSearchDuration time.
 			killerMoves[i][0], killerMoves[i][1] = nil, nil
 		}
 
-		score, pv = negamax(mg, pos, depth, -eval.CheckmateScore, eval.CheckmateScore, 0, killerMoves, pv)
+		sh := &sortingHeuristics{
+			killerMoves: killerMoves,
+			prevPv:      pv,
+		}
+
+		score, pv = negamax(ctx, pos, sh, depth, -eval.CheckmateScore, eval.CheckmateScore, 0)
 
 		if time.Since(tStart) >= minSearchDuration {
 			break
