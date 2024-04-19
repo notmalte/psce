@@ -11,6 +11,7 @@ import (
 	"github.com/notmalte/psce/internal/movegen"
 	"github.com/notmalte/psce/internal/position"
 	"github.com/notmalte/psce/internal/search"
+	"github.com/notmalte/psce/internal/tt"
 	"github.com/notmalte/psce/internal/zobrist"
 	"time"
 )
@@ -56,6 +57,8 @@ func Run() {
 
 	pos := position.Initial()
 	hash := zk.GenerateHash(pos)
+
+	table := tt.NewTranspositionTable(1 << 22)
 
 	isUsersTurn := userColor == pos.ColorToMove
 
@@ -156,15 +159,8 @@ func Run() {
 				history = append(history, historyEntry{posBeforeMove: pos, move: userMove})
 				newPos := pos.MakeMove(mg, userMove, false)
 
-				fmt.Printf("Previous hash: %d\n", hash)
-
-				t0Incr := time.Now()
 				incrHash := zk.IncrementalHash(hash, pos, newPos, userMove)
-				fmt.Printf("Incremental hash: %d (took: %dns)\n", incrHash, time.Since(t0Incr).Nanoseconds())
-
-				t0Fresh := time.Now()
 				freshHash := zk.GenerateHash(newPos)
-				fmt.Printf("Fresh hash: %d (took: %dns)\n", freshHash, time.Since(t0Fresh).Nanoseconds())
 
 				if freshHash != incrHash {
 					panic("Hash mismatch")
@@ -187,7 +183,7 @@ func Run() {
 
 			findBestMove := func() {
 				tStart := time.Now()
-				bestScore, bestMove, bestPv = search.Search(ctx, pos, 1*time.Second)
+				bestScore, bestMove, bestPv = search.Search(ctx, pos, table, 5*time.Second)
 				ms = time.Since(tStart).Milliseconds()
 			}
 
@@ -222,7 +218,7 @@ func Run() {
 
 			fmt.Printf("Computer played: %s (score: %d, took: %dms)\n", bestMove.UciString(), bestScore, ms)
 			if len(bestPv) != 0 {
-				fmt.Printf("Principal variation:")
+				fmt.Printf("Principal variation (depth %d):", len(bestPv))
 				for _, pvMove := range bestPv {
 					fmt.Printf(" %s", pvMove.UciString())
 				}

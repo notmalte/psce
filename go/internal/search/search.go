@@ -1,11 +1,13 @@
 package search
 
 import (
+	"fmt"
 	"github.com/notmalte/psce/internal/constants"
 	"github.com/notmalte/psce/internal/eval"
 	"github.com/notmalte/psce/internal/move"
 	"github.com/notmalte/psce/internal/movegen"
 	"github.com/notmalte/psce/internal/position"
+	"github.com/notmalte/psce/internal/tt"
 	"github.com/notmalte/psce/internal/zobrist"
 	"math/bits"
 	"slices"
@@ -139,9 +141,21 @@ func quiescence(ctx *Context, pos *position.Position, alpha int, beta int) int {
 	return alpha
 }
 
-func negamax(ctx *Context, pos *position.Position, sh *sortingHeuristics, depth uint, alpha int, beta int, ply int) (int, []*move.Move) {
+func negamax(ttHit *uint, ttMiss *uint, ctx *Context, pos *position.Position, sh *sortingHeuristics, table *tt.TranspositionTable, depth uint, alpha int, beta int, ply int) (int, []*move.Move) {
+	hash := ctx.ZobristKeys.GenerateHash(pos)
+
+	score, found := table.Probe(hash, depth, alpha, beta)
+	if found && ply > 0 {
+		*ttHit++
+		return score, []*move.Move{}
+	} else {
+		*ttMiss++
+	}
+
 	if depth == 0 {
-		return quiescence(ctx, pos, alpha, beta), []*move.Move{}
+		qs := quiescence(ctx, pos, alpha, beta)
+		table.Store(hash, depth, tt.FlagExact, qs)
+		return qs, []*move.Move{}
 	}
 
 	pseudoMoves := generateSortedPseudoLegalMoves(ctx.MoveGen, pos, sh, ply)
@@ -150,12 +164,14 @@ func negamax(ctx *Context, pos *position.Position, sh *sortingHeuristics, depth 
 
 	var pv []*move.Move
 
+	ttFlag := tt.FlagAlpha
+
 	for _, pseudoMove := range pseudoMoves {
 		newPos := pos.MakeMove(ctx.MoveGen, &pseudoMove, false)
 
 		if newPos != nil {
 			canMove = true
-			evNeg, childPv := negamax(ctx, newPos, sh, depth-1, -beta, -alpha, ply+1)
+			evNeg, childPv := negamax(ttHit, ttMiss, ctx, newPos, sh, table, depth-1, -beta, -alpha, ply+1)
 
 			ev := -evNeg
 
@@ -167,42 +183,46 @@ func negamax(ctx *Context, pos *position.Position, sh *sortingHeuristics, depth 
 					sh.killerMoves[ply][0] = &pseudoMove
 				}
 
+				table.Store(hash, depth, tt.FlagBeta, beta)
 				return beta, []*move.Move{&pseudoMove}
 			}
 
 			if ev > alpha {
+				ttFlag = tt.FlagExact
+
 				alpha = ev
 				pv = append([]*move.Move{&pseudoMove}, childPv...)
 			}
 		}
 	}
 
-	if !canMove {
-		isWhite := pos.ColorToMove == constants.ColorWhite
-
-		var opponentColor uint8
-		var kingPiece uint8
-		if isWhite {
-			opponentColor = constants.ColorBlack
-			kingPiece = constants.WhiteKing
-		} else {
-			opponentColor = constants.ColorWhite
-			kingPiece = constants.BlackKing
-		}
-
-		kingSquare := uint8(bits.TrailingZeros64(pos.PieceBitboards[kingPiece]))
-
-		if ctx.MoveGen.IsSquareAttacked(pos, kingSquare, opponentColor) {
-			return -eval.CheckmateScore + ply, []*move.Move{}
-		} else {
-			return 0, []*move.Move{}
-		}
+	if canMove {
+		table.Store(hash, depth, ttFlag, alpha)
+		return alpha, pv
 	}
 
-	return alpha, pv
+	isWhite := pos.ColorToMove == constants.ColorWhite
+
+	var opponentColor uint8
+	var kingPiece uint8
+	if isWhite {
+		opponentColor = constants.ColorBlack
+		kingPiece = constants.WhiteKing
+	} else {
+		opponentColor = constants.ColorWhite
+		kingPiece = constants.BlackKing
+	}
+
+	kingSquare := uint8(bits.TrailingZeros64(pos.PieceBitboards[kingPiece]))
+
+	if ctx.MoveGen.IsSquareAttacked(pos, kingSquare, opponentColor) {
+		return -eval.CheckmateScore + ply, []*move.Move{}
+	} else {
+		return 0, []*move.Move{}
+	}
 }
 
-func Search(ctx *Context, pos *position.Position, minSearchDuration time.Duration) (int, *move.Move, []*move.Move) {
+func Search(ctx *Context, pos *position.Position, table *tt.TranspositionTable, minSearchDuration time.Duration) (int, *move.Move, []*move.Move) {
 	if minSearchDuration <= 0 {
 		panic("min search duration must be positive")
 	}
@@ -223,7 +243,12 @@ func Search(ctx *Context, pos *position.Position, minSearchDuration time.Duratio
 			prevPv:      pv,
 		}
 
-		score, pv = negamax(ctx, pos, sh, depth, -eval.CheckmateScore, eval.CheckmateScore, 0)
+		ttHit := uint(0)
+		ttMiss := uint(0)
+
+		score, pv = negamax(&ttHit, &ttMiss, ctx, pos, sh, table, depth, -eval.CheckmateScore, eval.CheckmateScore, 0)
+
+		fmt.Printf("TT hit rate: %.2f%% (%d/%d)\n", float64(ttHit)/float64(ttHit+ttMiss)*100, ttHit, ttHit+ttMiss)
 
 		if time.Since(tStart) >= minSearchDuration {
 			break
