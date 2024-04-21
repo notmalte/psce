@@ -2,7 +2,7 @@ use strum::FromRepr;
 
 #[allow(dead_code)]
 #[repr(u8)]
-#[derive(FromRepr, Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(FromRepr, Debug, PartialEq, Clone, Copy)]
 pub enum Square {
     A8,
     B8,

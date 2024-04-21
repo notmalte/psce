@@ -1,9 +1,12 @@
 use std::fmt::Display;
 
+mod container;
 mod square;
 
+pub use container::*;
 pub use square::*;
 
+#[derive(Clone, Copy, PartialEq)]
 pub struct Bitboard(u64);
 
 /*
