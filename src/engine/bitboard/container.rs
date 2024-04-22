@@ -7,6 +7,14 @@ pub struct BitboardContainer {
 }
 
 impl BitboardContainer {
+    pub fn empty() -> Self {
+        Self {
+            pieces: [Bitboard::empty(); 12],
+            colors: [Bitboard::empty(); 2],
+            all: Bitboard::empty(),
+        }
+    }
+
     pub fn piece(&self, piece: Piece) -> Bitboard {
         self.pieces[piece as usize]
     }

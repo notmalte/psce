@@ -37,7 +37,7 @@ impl CastlingRights {
         self.0 == Castling::None.to_repr()
     }
 
-    pub fn can(&self, cstl: Castling) -> bool {
+    pub fn has(&self, cstl: Castling) -> bool {
         (self.0 & cstl.to_repr()) != 0
     }
 
@@ -57,19 +57,19 @@ impl Display for CastlingRights {
         } else {
             let mut s = String::new();
 
-            if self.can(Castling::WhiteKingSide) {
+            if self.has(Castling::WhiteKingSide) {
                 s.push('K');
             }
 
-            if self.can(Castling::WhiteQueenSide) {
+            if self.has(Castling::WhiteQueenSide) {
                 s.push('Q');
             }
 
-            if self.can(Castling::BlackKingSide) {
+            if self.has(Castling::BlackKingSide) {
                 s.push('k');
             }
 
-            if self.can(Castling::BlackQueenSide) {
+            if self.has(Castling::BlackQueenSide) {
                 s.push('q');
             }
 
