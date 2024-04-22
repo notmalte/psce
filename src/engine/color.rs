@@ -1,6 +1,8 @@
 use std::ops::Not;
 
-#[derive(Clone, Copy, PartialEq)]
+use strum::Display;
+
+#[derive(Clone, Copy, PartialEq, Display)]
 pub enum Color {
     White,
     Black,

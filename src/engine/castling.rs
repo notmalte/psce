@@ -12,7 +12,7 @@ pub enum Castling {
 }
 
 impl Castling {
-    pub fn to_repr(self) -> u8 {
+    fn to_repr(self) -> u8 {
         self as u8
     }
 }
@@ -21,6 +21,26 @@ impl Castling {
 pub struct CastlingRights(u8);
 
 impl CastlingRights {
+    pub fn from_str(s: &str) -> Result<Self, String> {
+        let mut cstl = CastlingRights::none();
+
+        if s == "-" {
+            return Ok(cstl);
+        }
+
+        for c in s.chars() {
+            match c {
+                'K' => cstl.set(Castling::WhiteKingSide),
+                'Q' => cstl.set(Castling::WhiteQueenSide),
+                'k' => cstl.set(Castling::BlackKingSide),
+                'q' => cstl.set(Castling::BlackQueenSide),
+                _ => return Err(format!("Invalid castling rights: {}", s)),
+            }
+        }
+
+        Ok(cstl)
+    }
+
     pub fn all() -> Self {
         CastlingRights(Castling::All.to_repr())
     }

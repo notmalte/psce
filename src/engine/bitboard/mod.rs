@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, ops::BitOr};
 
 mod container;
 mod square;
@@ -89,6 +89,14 @@ impl Display for Bitboard {
         write!(f, "\ndec: {}", self.0)?;
 
         Ok(())
+    }
+}
+
+impl BitOr for Bitboard {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Bitboard(self.0 | rhs.0)
     }
 }
 

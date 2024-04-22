@@ -1,3 +1,5 @@
+use std::ops::BitOr;
+
 use crate::engine::piece::Piece;
 
 #[derive(Clone)]
@@ -42,7 +44,7 @@ impl MoveFlags {
     }
 }
 
-impl std::ops::BitOr<MoveFlag> for MoveFlag {
+impl BitOr<MoveFlag> for MoveFlag {
     type Output = MoveFlags;
 
     fn bitor(self, rhs: Self) -> Self::Output {
@@ -50,7 +52,7 @@ impl std::ops::BitOr<MoveFlag> for MoveFlag {
     }
 }
 
-impl std::ops::BitOr<MoveFlag> for MoveFlags {
+impl BitOr<MoveFlag> for MoveFlags {
     type Output = MoveFlags;
 
     fn bitor(self, rhs: MoveFlag) -> Self::Output {
@@ -58,7 +60,7 @@ impl std::ops::BitOr<MoveFlag> for MoveFlags {
     }
 }
 
-impl std::ops::BitOr<MoveFlags> for MoveFlag {
+impl BitOr<MoveFlags> for MoveFlag {
     type Output = MoveFlags;
 
     fn bitor(self, rhs: MoveFlags) -> Self::Output {
@@ -66,7 +68,7 @@ impl std::ops::BitOr<MoveFlags> for MoveFlag {
     }
 }
 
-impl std::ops::BitOr<MoveFlags> for MoveFlags {
+impl BitOr<MoveFlags> for MoveFlags {
     type Output = MoveFlags;
 
     fn bitor(self, rhs: Self) -> Self::Output {

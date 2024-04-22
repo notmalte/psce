@@ -1,7 +1,7 @@
-use crate::engine::bitboard::Bitboard;
+use crate::engine::position::Position;
 
 pub fn run() {
-    let bb = Bitboard::empty();
+    let pos = Position::initial();
 
-    println!("{}", bb)
+    println!("{}", pos);
 }
