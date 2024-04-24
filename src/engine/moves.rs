@@ -1,11 +1,11 @@
 use std::ops::BitOr;
 
-use crate::engine::piece::Piece;
+use crate::engine::{bitboard::Square, piece::Piece};
 
 #[derive(Clone)]
 pub struct Move {
-    from: u8,
-    to: u8,
+    from: Square,
+    to: Square,
     piece: Piece,
     promotion: Option<Piece>,
     flags: MoveFlags,
@@ -22,7 +22,7 @@ pub enum MoveFlag {
 }
 
 impl MoveFlag {
-    pub fn to_repr(self) -> u8 {
+    fn to_repr(self) -> u8 {
         self as u8
     }
 }

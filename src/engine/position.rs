@@ -1,7 +1,7 @@
-use std::fmt::Display;
+use std::{fmt::Display, str::FromStr};
 
 use crate::engine::{
-    bitboard::{Bitboard, BitboardContainer},
+    bitboard::{Bitboard, BitboardContainer, Square},
     castling::CastlingRights,
     color::Color,
     piece::Piece,
@@ -13,7 +13,7 @@ pub struct Position {
     bitboards: BitboardContainer,
     color_to_move: Color,
     castling_rights: CastlingRights,
-    en_passant_square: Option<u8>,
+    en_passant_square: Option<Square>,
 }
 
 impl Position {
@@ -82,7 +82,7 @@ impl Position {
 
         position.en_passant_square = match parts[3] {
             "-" => None,
-            _s => unimplemented!(), // TODO
+            s => Some(Square::from_str(s)?),
         };
 
         *position.bitboards.all_mut() =
@@ -101,10 +101,8 @@ impl Display for Position {
         write!(
             f,
             "En passant square: {}",
-            match self.en_passant_square {
-                Some(square) => square.to_string(), // TODO: still an u8
-                None => "-".to_string(),
-            }
+            self.en_passant_square
+                .map_or("-".to_string(), |s| s.to_string())
         )?;
 
         Ok(())

@@ -1,4 +1,7 @@
-use std::{fmt::Display, ops::BitOr};
+use std::{
+    fmt::Display,
+    ops::{BitAnd, BitOr, Not, Shl},
+};
 
 mod container;
 mod square;
@@ -6,7 +9,7 @@ mod square;
 pub use container::*;
 pub use square::*;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Bitboard(u64);
 
 /*
@@ -35,7 +38,7 @@ impl Bitboard {
         Bitboard(0)
     }
 
-    pub fn get(&self, index: u8) -> bool {
+    pub fn get(self, index: u8) -> bool {
         (self.0 & (1 << index)) != 0
     }
 
@@ -51,7 +54,7 @@ impl Bitboard {
         x + y * 8
     }
 
-    pub fn get_xy(&self, x: u8, y: u8) -> bool {
+    pub fn get_xy(self, x: u8, y: u8) -> bool {
         self.get(Self::xy_to_index(x, y))
     }
 
@@ -61,6 +64,22 @@ impl Bitboard {
 
     pub fn clear_xy(&mut self, x: u8, y: u8) {
         self.clear(Self::xy_to_index(x, y))
+    }
+
+    pub const fn bitor(self, rhs: Self) -> Self {
+        Self(self.0 | rhs.0)
+    }
+
+    pub const fn bitand(self, rhs: Self) -> Self {
+        Self(self.0 & rhs.0)
+    }
+
+    pub const fn shl(self, rhs: usize) -> Self {
+        Self(self.0 << rhs)
+    }
+
+    pub const fn not(self) -> Self {
+        Self(!self.0)
     }
 }
 
@@ -96,7 +115,31 @@ impl BitOr for Bitboard {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        Bitboard(self.0 | rhs.0)
+        self.bitor(rhs)
+    }
+}
+
+impl BitAnd for Bitboard {
+    type Output = Self;
+
+    fn bitand(self, rhs: Self) -> Self::Output {
+        self.bitand(rhs)
+    }
+}
+
+impl Shl<usize> for Bitboard {
+    type Output = Self;
+
+    fn shl(self, rhs: usize) -> Self::Output {
+        self.shl(rhs)
+    }
+}
+
+impl Not for Bitboard {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        self.not()
     }
 }
 

@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, str::FromStr};
 
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq)]
@@ -21,26 +21,6 @@ impl Castling {
 pub struct CastlingRights(u8);
 
 impl CastlingRights {
-    pub fn from_str(s: &str) -> Result<Self, String> {
-        let mut cstl = CastlingRights::none();
-
-        if s == "-" {
-            return Ok(cstl);
-        }
-
-        for c in s.chars() {
-            match c {
-                'K' => cstl.set(Castling::WhiteKingSide),
-                'Q' => cstl.set(Castling::WhiteQueenSide),
-                'k' => cstl.set(Castling::BlackKingSide),
-                'q' => cstl.set(Castling::BlackQueenSide),
-                _ => return Err(format!("Invalid castling rights: {}", s)),
-            }
-        }
-
-        Ok(cstl)
-    }
-
     pub fn all() -> Self {
         CastlingRights(Castling::All.to_repr())
     }
@@ -67,6 +47,30 @@ impl CastlingRights {
 
     pub fn clear(&mut self, cstl: Castling) {
         self.0 &= !cstl.to_repr();
+    }
+}
+
+impl FromStr for CastlingRights {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut cstl = CastlingRights::none();
+
+        if s == "-" {
+            return Ok(cstl);
+        }
+
+        for c in s.chars() {
+            match c {
+                'K' => cstl.set(Castling::WhiteKingSide),
+                'Q' => cstl.set(Castling::WhiteQueenSide),
+                'k' => cstl.set(Castling::BlackKingSide),
+                'q' => cstl.set(Castling::BlackQueenSide),
+                _ => return Err(format!("Invalid castling rights: {}", s)),
+            }
+        }
+
+        Ok(cstl)
     }
 }
 
