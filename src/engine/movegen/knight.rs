@@ -20,7 +20,7 @@ impl KnightMoveGen {
     fn generate_attack_table() -> [Bitboard; 64] {
         let mut table = [Bitboard::empty(); 64];
 
-        for square in Bitboard::squares() {
+        for square in Bitboard::all_squares() {
             table[square.to_repr() as usize] = Self::mask_attacks(square);
         }
 
@@ -53,17 +53,13 @@ impl KnightMoveGen {
 
         let mut moves = vec![];
 
-        let mut knights = position.bitboards().piece(piece);
+        let knights = position.bitboards().piece(piece);
 
-        while !knights.is_empty() {
-            let from_square = knights.pop_square().unwrap();
-
-            let mut attacks = self.attack_table[from_square.to_repr() as usize]
+        for from_square in knights.squares() {
+            let attacks = self.attack_table[from_square.to_repr() as usize]
                 & !position.bitboards().color(color);
 
-            while !attacks.is_empty() {
-                let to_square = attacks.pop_square().unwrap();
-
+            for to_square in attacks.squares() {
                 let capture = position.bitboards().all().get(to_square);
 
                 let flags = if capture {

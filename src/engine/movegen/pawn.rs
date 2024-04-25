@@ -17,7 +17,7 @@ impl PawnMoveGen {
     fn generate_attack_table() -> [[Bitboard; 64]; 2] {
         let mut table = [[Bitboard::empty(); 64]; 2];
 
-        for square in Bitboard::squares() {
+        for square in Bitboard::all_squares() {
             table[Color::White.to_repr() as usize][square.to_repr() as usize] =
                 Self::mask_attacks(Color::White, square);
             table[Color::Black.to_repr() as usize][square.to_repr() as usize] =

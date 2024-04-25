@@ -38,7 +38,7 @@ impl Bitboard {
         Bitboard(0)
     }
 
-    pub fn squares() -> BitboardAllSquaresIterator {
+    pub fn all_squares() -> BitboardAllSquaresIterator {
         BitboardAllSquaresIterator::new()
     }
 
@@ -68,6 +68,10 @@ impl Bitboard {
         self.clear(square);
 
         Some(square)
+    }
+
+    pub fn squares(self) -> BitboardSetSquaresIterator {
+        BitboardSetSquaresIterator::new(self)
     }
 
     pub const fn bitor(self, rhs: Self) -> Self {
@@ -192,6 +196,24 @@ impl Iterator for BitboardAllSquaresIterator {
             self.index += 1;
             result
         }
+    }
+}
+
+pub struct BitboardSetSquaresIterator {
+    bitboard: Bitboard,
+}
+
+impl BitboardSetSquaresIterator {
+    fn new(bitboard: Bitboard) -> Self {
+        Self { bitboard }
+    }
+}
+
+impl Iterator for BitboardSetSquaresIterator {
+    type Item = Square;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.bitboard.pop_square()
     }
 }
 
