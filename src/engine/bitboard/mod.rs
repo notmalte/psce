@@ -1,6 +1,6 @@
 use std::{
     fmt::Display,
-    ops::{BitAnd, BitOr, Not, Shl},
+    ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, Not, Shl, Shr},
 };
 
 mod container;
@@ -38,33 +38,31 @@ impl Bitboard {
         Bitboard(0)
     }
 
-    pub fn get(self, index: u8) -> bool {
-        (self.0 & (1 << index)) != 0
+    pub fn squares() -> BitboardAllSquaresIterator {
+        BitboardAllSquaresIterator::new()
     }
 
-    pub fn set(&mut self, index: u8) {
-        self.0 |= 1 << index;
+    pub fn get(self, square: Square) -> bool {
+        !(self & square.to_bb()).is_empty()
     }
 
-    pub fn clear(&mut self, index: u8) {
-        self.0 &= !(1 << index);
+    pub fn set(&mut self, square: Square) {
+        *self |= square.to_bb();
     }
 
-    pub fn xy_to_index(x: u8, y: u8) -> u8 {
-        x + y * 8
+    pub fn clear(&mut self, square: Square) {
+        *self &= !square.to_bb();
     }
 
-    pub fn get_xy(self, x: u8, y: u8) -> bool {
-        self.get(Self::xy_to_index(x, y))
+    pub fn is_empty(self) -> bool {
+        self.0 == 0
     }
 
-    pub fn set_xy(&mut self, x: u8, y: u8) {
-        self.set(Self::xy_to_index(x, y))
+    pub fn last_square(self) -> Option<Square> {
+        Square::from_repr(self.0.trailing_zeros() as u8)
     }
 
-    pub fn clear_xy(&mut self, x: u8, y: u8) {
-        self.clear(Self::xy_to_index(x, y))
-    }
+    // TODO: pop_square shortcut
 
     pub const fn bitor(self, rhs: Self) -> Self {
         Self(self.0 | rhs.0)
@@ -74,12 +72,16 @@ impl Bitboard {
         Self(self.0 & rhs.0)
     }
 
+    pub const fn not(self) -> Self {
+        Self(!self.0)
+    }
+
     pub const fn shl(self, rhs: usize) -> Self {
         Self(self.0 << rhs)
     }
 
-    pub const fn not(self) -> Self {
-        Self(!self.0)
+    pub const fn shr(self, rhs: usize) -> Self {
+        Self(self.0 >> rhs)
     }
 }
 
@@ -95,7 +97,7 @@ impl Display for Bitboard {
                     write!(f, " ")?;
                 }
 
-                if self.get_xy(x, y) {
+                if self.get(Square::from_xy(x, y).unwrap()) {
                     write!(f, "1")?;
                 } else {
                     write!(f, "0")?;
@@ -119,6 +121,12 @@ impl BitOr for Bitboard {
     }
 }
 
+impl BitOrAssign for Bitboard {
+    fn bitor_assign(&mut self, rhs: Self) {
+        *self = *self | rhs;
+    }
+}
+
 impl BitAnd for Bitboard {
     type Output = Self;
 
@@ -127,11 +135,9 @@ impl BitAnd for Bitboard {
     }
 }
 
-impl Shl<usize> for Bitboard {
-    type Output = Self;
-
-    fn shl(self, rhs: usize) -> Self::Output {
-        self.shl(rhs)
+impl BitAndAssign for Bitboard {
+    fn bitand_assign(&mut self, rhs: Self) {
+        *self = *self & rhs;
     }
 }
 
@@ -143,6 +149,46 @@ impl Not for Bitboard {
     }
 }
 
+impl Shl<usize> for Bitboard {
+    type Output = Self;
+
+    fn shl(self, rhs: usize) -> Self::Output {
+        self.shl(rhs)
+    }
+}
+
+impl Shr<usize> for Bitboard {
+    type Output = Self;
+
+    fn shr(self, rhs: usize) -> Self::Output {
+        self.shr(rhs)
+    }
+}
+
+pub struct BitboardAllSquaresIterator {
+    index: u8,
+}
+
+impl BitboardAllSquaresIterator {
+    fn new() -> Self {
+        Self { index: 0 }
+    }
+}
+
+impl Iterator for BitboardAllSquaresIterator {
+    type Item = Square;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index >= 64 {
+            None
+        } else {
+            let result = Some(Square::from_repr_unchecked(self.index));
+            self.index += 1;
+            result
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -151,71 +197,34 @@ mod tests {
     fn test_bitboard_get_set_clear() {
         let mut bb = Bitboard::empty();
 
-        assert!(!bb.get(0));
-        assert!(!bb.get(1));
-        assert!(!bb.get(63));
+        assert!(!bb.get(Square::from_repr(0).unwrap()));
+        assert!(!bb.get(Square::from_repr(1).unwrap()));
+        assert!(!bb.get(Square::from_repr(63).unwrap()));
 
-        bb.set(0);
+        bb.set(Square::from_repr(0).unwrap());
 
-        assert!(bb.get(0));
-        assert!(!bb.get(1));
-        assert!(!bb.get(63));
+        assert!(bb.get(Square::from_repr(0).unwrap()));
+        assert!(!bb.get(Square::from_repr(1).unwrap()));
+        assert!(!bb.get(Square::from_repr(63).unwrap()));
 
-        bb.set(63);
+        bb.set(Square::from_repr(63).unwrap());
 
-        assert!(bb.get(0));
-        assert!(!bb.get(1));
-        assert!(bb.get(63));
+        assert!(bb.get(Square::from_repr(0).unwrap()));
+        assert!(!bb.get(Square::from_repr(1).unwrap()));
+        assert!(bb.get(Square::from_repr(63).unwrap()));
 
-        bb.clear(0);
+        bb.clear(Square::from_repr(0).unwrap());
 
-        assert!(!bb.get(0));
-        assert!(!bb.get(1));
-        assert!(bb.get(63));
+        assert!(!bb.get(Square::from_repr(0).unwrap()));
+        assert!(!bb.get(Square::from_repr(1).unwrap()));
+        assert!(bb.get(Square::from_repr(63).unwrap()));
 
-        bb.set(0);
-        bb.clear(63);
-        bb.clear(63);
+        bb.set(Square::from_repr(0).unwrap());
+        bb.clear(Square::from_repr(63).unwrap());
+        bb.clear(Square::from_repr(63).unwrap());
 
-        assert!(bb.get(0));
-        assert!(!bb.get(1));
-        assert!(!bb.get(63));
-    }
-
-    #[test]
-    fn test_xy_to_index() {
-        assert_eq!(Bitboard::xy_to_index(0, 0), 0);
-        assert_eq!(Bitboard::xy_to_index(7, 7), 63);
-        assert_eq!(Bitboard::xy_to_index(3, 4), 35);
-    }
-
-    #[test]
-    fn test_bitboard_xy() {
-        let mut bb = Bitboard::empty();
-
-        assert!(!bb.get_xy(0, 0));
-        assert!(!bb.get_xy(7, 7));
-
-        bb.set_xy(0, 0);
-
-        assert!(bb.get_xy(0, 0));
-        assert!(!bb.get_xy(7, 7));
-
-        bb.set_xy(7, 7);
-
-        assert!(bb.get_xy(0, 0));
-        assert!(bb.get_xy(7, 7));
-
-        bb.clear_xy(0, 0);
-
-        assert!(!bb.get_xy(0, 0));
-        assert!(bb.get_xy(7, 7));
-
-        bb.set_xy(0, 0);
-        bb.clear_xy(7, 7);
-        bb.clear_xy(7, 7);
-
-        assert!(bb.get_xy(0, 0));
-        assert!(!bb.get_xy(7, 7));
+        assert!(bb.get(Square::from_repr(0).unwrap()));
+        assert!(!bb.get(Square::from_repr(1).unwrap()));
+        assert!(!bb.get(Square::from_repr(63).unwrap()));
     }
 }

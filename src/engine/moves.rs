@@ -1,14 +1,54 @@
-use std::ops::BitOr;
+use std::{fmt::Display, ops::BitOr};
 
 use crate::engine::{bitboard::Square, piece::Piece};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Move {
     from: Square,
     to: Square,
     piece: Piece,
     promotion: Option<Piece>,
     flags: MoveFlags,
+}
+
+impl Move {
+    pub fn new(
+        from: Square,
+        to: Square,
+        piece: Piece,
+        promotion: Option<Piece>,
+        flags: MoveFlags,
+    ) -> Self {
+        Self {
+            from,
+            to,
+            piece,
+            promotion,
+            flags,
+        }
+    }
+}
+
+impl Display for Move {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}{}{}{}{}",
+            self.piece,
+            self.from,
+            if self.flags.has(MoveFlag::Capture) {
+                "x"
+            } else {
+                ""
+            },
+            self.to,
+            if let Some(promotion) = self.promotion {
+                promotion.to_string()
+            } else {
+                "".to_string()
+            }
+        )
+    }
 }
 
 #[repr(u8)]
@@ -25,9 +65,13 @@ impl MoveFlag {
     fn to_repr(self) -> u8 {
         self as u8
     }
+
+    pub fn to_flags(self) -> MoveFlags {
+        MoveFlags::from_flag(self)
+    }
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct MoveFlags(u8);
 
 impl MoveFlags {

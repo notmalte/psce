@@ -58,7 +58,7 @@ impl Position {
                 } else {
                     let piece = Piece::from_char(c).ok_or_else(|| "Invalid piece".to_string())?;
 
-                    let square = Bitboard::xy_to_index(x as u8, y as u8);
+                    let square = Square::from_xy(x as u8, y as u8).unwrap();
 
                     position.bitboards.piece_mut(piece).set(square);
                     position.bitboards.color_mut(piece.color()).set(square);
@@ -89,6 +89,14 @@ impl Position {
             position.bitboards.color(Color::White) | position.bitboards.color(Color::Black);
 
         Ok(position)
+    }
+
+    pub fn bitboards(&self) -> &BitboardContainer {
+        &self.bitboards
+    }
+
+    pub fn color_to_move(&self) -> Color {
+        self.color_to_move
     }
 }
 

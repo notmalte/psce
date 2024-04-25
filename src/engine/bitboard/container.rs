@@ -1,6 +1,10 @@
 use std::fmt::Display;
 
-use crate::engine::{bitboard::Bitboard, color::Color, piece::Piece};
+use crate::engine::{
+    bitboard::{Bitboard, Square},
+    color::Color,
+    piece::Piece,
+};
 
 pub struct BitboardContainer {
     pieces: [Bitboard; 12],
@@ -41,7 +45,7 @@ impl BitboardContainer {
         &mut self.all
     }
 
-    pub fn find_piece_on_square(&self, square: u8) -> Option<Piece> {
+    pub fn find_piece_on_square(&self, square: Square) -> Option<Piece> {
         for (piece, bitboard) in self.pieces.iter().enumerate() {
             if bitboard.get(square) {
                 return Some(Piece::from_repr(piece as u8).unwrap());
@@ -52,7 +56,7 @@ impl BitboardContainer {
     }
 
     pub fn find_piece_on_xy(&self, x: u8, y: u8) -> Option<Piece> {
-        self.find_piece_on_square(Bitboard::xy_to_index(x, y))
+        self.find_piece_on_square(Square::from_xy(x, y).unwrap())
     }
 }
 
@@ -69,7 +73,7 @@ impl Display for BitboardContainer {
                 }
 
                 if let Some(piece) = self.find_piece_on_xy(x, y) {
-                    write!(f, "{}", piece)?;
+                    write!(f, "{}", piece.to_pretty_char())?;
                 } else {
                     write!(f, ".")?;
                 }
