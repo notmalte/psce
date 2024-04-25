@@ -1,7 +1,7 @@
 use crate::engine::{
     bitboard::{Bitboard, NOT_FILE_A, NOT_FILE_AB, NOT_FILE_GH, NOT_FILE_H},
     color::Color,
-    moves::{Move, MoveFlag, MoveFlags},
+    moves::{Move, MoveFlags},
     piece::Piece,
     position::Position,
 };
@@ -63,9 +63,9 @@ impl KnightMoveGen {
                 let capture = position.bitboards().all().get(to_square);
 
                 let flags = if capture {
-                    MoveFlag::Capture.to_flags()
+                    MoveFlags::CAPTURE
                 } else {
-                    MoveFlags::none()
+                    MoveFlags::NONE
                 };
 
                 moves.push(Move::new(from_square, to_square, piece, None, flags));

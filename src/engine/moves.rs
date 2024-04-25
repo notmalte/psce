@@ -36,11 +36,7 @@ impl Display for Move {
             "{}{}{}{}{}",
             self.piece,
             self.from,
-            if self.flags.has(MoveFlag::Capture) {
-                "x"
-            } else {
-                ""
-            },
+            if self.flags.is_capture() { "x" } else { "" },
             self.to,
             if let Some(promotion) = self.promotion {
                 promotion.to_string()
@@ -51,64 +47,34 @@ impl Display for Move {
     }
 }
 
-#[repr(u8)]
-#[derive(Clone, Copy, PartialEq)]
-pub enum MoveFlag {
-    None = 0b0000,
-    Capture = 0b0001,
-    EnPassant = 0b0010,
-    Castling = 0b0100,
-    DoublePush = 0b1000,
-}
-
-impl MoveFlag {
-    fn to_repr(self) -> u8 {
-        self as u8
-    }
-
-    pub fn to_flags(self) -> MoveFlags {
-        MoveFlags::from_flag(self)
-    }
-}
-
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct MoveFlags(u8);
 
 impl MoveFlags {
-    pub fn none() -> Self {
-        MoveFlags(MoveFlag::None.to_repr())
+    pub const NONE: Self = MoveFlags(0b0000);
+    pub const CAPTURE: Self = MoveFlags(0b0001);
+    pub const EN_PASSANT: Self = MoveFlags(0b0010);
+    pub const CASTLING: Self = MoveFlags(0b0100);
+    pub const DOUBLE_PUSH: Self = MoveFlags(0b1000);
+
+    pub fn has(&self, flags: MoveFlags) -> bool {
+        (self.0 & flags.0) != 0
     }
 
-    pub fn from_flag(flag: MoveFlag) -> Self {
-        MoveFlags(flag.to_repr())
+    pub fn is_capture(&self) -> bool {
+        self.has(MoveFlags::CAPTURE)
     }
 
-    pub fn has(&self, flag: MoveFlag) -> bool {
-        (self.0 & flag.to_repr()) != 0
+    pub fn is_en_passant(&self) -> bool {
+        self.has(MoveFlags::EN_PASSANT)
     }
-}
 
-impl BitOr<MoveFlag> for MoveFlag {
-    type Output = MoveFlags;
-
-    fn bitor(self, rhs: Self) -> Self::Output {
-        MoveFlags(self.to_repr() | rhs.to_repr())
+    pub fn is_castling(&self) -> bool {
+        self.has(MoveFlags::CASTLING)
     }
-}
 
-impl BitOr<MoveFlag> for MoveFlags {
-    type Output = MoveFlags;
-
-    fn bitor(self, rhs: MoveFlag) -> Self::Output {
-        MoveFlags(self.0 | rhs.to_repr())
-    }
-}
-
-impl BitOr<MoveFlags> for MoveFlag {
-    type Output = MoveFlags;
-
-    fn bitor(self, rhs: MoveFlags) -> Self::Output {
-        MoveFlags(self.to_repr() | rhs.0)
+    pub fn is_double_push(&self) -> bool {
+        self.has(MoveFlags::DOUBLE_PUSH)
     }
 }
 
