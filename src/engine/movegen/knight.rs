@@ -56,13 +56,13 @@ impl KnightMoveGen {
         let mut knights = position.bitboards().piece(piece);
 
         while !knights.is_empty() {
-            let from_square = knights.last_square().unwrap();
+            let from_square = knights.pop_square().unwrap();
 
             let mut attacks = self.attack_table[from_square.to_repr() as usize]
                 & !position.bitboards().color(color);
 
             while !attacks.is_empty() {
-                let to_square = attacks.last_square().unwrap();
+                let to_square = attacks.pop_square().unwrap();
 
                 let capture = position.bitboards().all().get(to_square);
 
@@ -73,11 +73,7 @@ impl KnightMoveGen {
                 };
 
                 moves.push(Move::new(from_square, to_square, piece, None, flags));
-
-                attacks.clear(to_square);
             }
-
-            knights.clear(from_square);
         }
 
         moves

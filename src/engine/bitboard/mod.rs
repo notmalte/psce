@@ -62,7 +62,13 @@ impl Bitboard {
         Square::from_repr(self.0.trailing_zeros() as u8)
     }
 
-    // TODO: pop_square shortcut
+    pub fn pop_square(&mut self) -> Option<Square> {
+        let square = self.last_square()?;
+
+        self.clear(square);
+
+        Some(square)
+    }
 
     pub const fn bitor(self, rhs: Self) -> Self {
         Self(self.0 | rhs.0)
