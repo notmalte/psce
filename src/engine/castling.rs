@@ -1,60 +1,55 @@
 use std::{fmt::Display, str::FromStr};
 
-#[repr(u8)]
+use crate::engine::bitboard::{Bitboard, Square};
+
 #[derive(Clone, Copy, PartialEq)]
-pub enum Castling {
-    WhiteKingSide = 0b0001,
-    WhiteQueenSide = 0b0010,
-    BlackKingSide = 0b0100,
-    BlackQueenSide = 0b1000,
-    None = 0b0000,
-    All = 0b1111,
-}
+pub struct Castling(u8);
 
 impl Castling {
-    fn to_repr(self) -> u8 {
-        self as u8
+    pub const WHITE_KING_SIDE: Self = Castling(0b0001);
+    pub const WHITE_QUEEN_SIDE: Self = Castling(0b0010);
+    pub const BLACK_KING_SIDE: Self = Castling(0b0100);
+    pub const BLACK_QUEEN_SIDE: Self = Castling(0b1000);
+    pub const NONE: Self = Castling(0b0000);
+    pub const ALL: Self = Castling(0b1111);
+
+    pub const WHITE_KING_SIDE_SQUARES: Bitboard = Square::F1.to_bb().bitor(Square::G1.to_bb());
+    pub const WHITE_QUEEN_SIDE_SQUARES: Bitboard = Square::B1
+        .to_bb()
+        .bitor(Square::C1.to_bb())
+        .bitor(Square::D1.to_bb());
+    pub const BLACK_KING_SIDE_SQUARES: Bitboard = Square::F8.to_bb().bitor(Square::G8.to_bb());
+    pub const BLACK_QUEEN_SIDE_SQUARES: Bitboard = Square::B8
+        .to_bb()
+        .bitor(Square::C8.to_bb())
+        .bitor(Square::D8.to_bb());
+
+    pub fn is_all(self) -> bool {
+        self == Self::ALL
+    }
+
+    pub fn is_none(self) -> bool {
+        self == Self::NONE
+    }
+
+    pub fn can(self, cstl: Self) -> bool {
+        (self.0 & cstl.0) != 0
+    }
+
+    pub fn set(&mut self, cstl: Self) {
+        self.0 |= cstl.0;
+    }
+
+    pub fn clear(&mut self, cstl: Self) {
+        self.0 &= !cstl.0;
     }
 }
 
-#[derive(Clone, Copy, PartialEq)]
-pub struct CastlingRights(u8);
-
-impl CastlingRights {
-    pub fn all() -> Self {
-        CastlingRights(Castling::All.to_repr())
-    }
-
-    pub fn none() -> Self {
-        CastlingRights(Castling::None.to_repr())
-    }
-
-    pub fn is_all(&self) -> bool {
-        self.0 == Castling::All.to_repr()
-    }
-
-    pub fn is_none(&self) -> bool {
-        self.0 == Castling::None.to_repr()
-    }
-
-    pub fn has(&self, cstl: Castling) -> bool {
-        (self.0 & cstl.to_repr()) != 0
-    }
-
-    pub fn set(&mut self, cstl: Castling) {
-        self.0 |= cstl.to_repr();
-    }
-
-    pub fn clear(&mut self, cstl: Castling) {
-        self.0 &= !cstl.to_repr();
-    }
-}
-
-impl FromStr for CastlingRights {
+impl FromStr for Castling {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut cstl = CastlingRights::none();
+        let mut cstl = Self::NONE;
 
         if s == "-" {
             return Ok(cstl);
@@ -62,10 +57,10 @@ impl FromStr for CastlingRights {
 
         for c in s.chars() {
             match c {
-                'K' => cstl.set(Castling::WhiteKingSide),
-                'Q' => cstl.set(Castling::WhiteQueenSide),
-                'k' => cstl.set(Castling::BlackKingSide),
-                'q' => cstl.set(Castling::BlackQueenSide),
+                'K' => cstl.set(Self::WHITE_KING_SIDE),
+                'Q' => cstl.set(Self::WHITE_QUEEN_SIDE),
+                'k' => cstl.set(Self::BLACK_KING_SIDE),
+                'q' => cstl.set(Self::BLACK_QUEEN_SIDE),
                 _ => return Err(format!("Invalid castling rights: {}", s)),
             }
         }
@@ -74,26 +69,26 @@ impl FromStr for CastlingRights {
     }
 }
 
-impl Display for CastlingRights {
+impl Display for Castling {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.is_none() {
             write!(f, "-")
         } else {
             let mut s = String::new();
 
-            if self.has(Castling::WhiteKingSide) {
+            if self.can(Self::WHITE_KING_SIDE) {
                 s.push('K');
             }
 
-            if self.has(Castling::WhiteQueenSide) {
+            if self.can(Self::WHITE_QUEEN_SIDE) {
                 s.push('Q');
             }
 
-            if self.has(Castling::BlackKingSide) {
+            if self.can(Self::BLACK_KING_SIDE) {
                 s.push('k');
             }
 
-            if self.has(Castling::BlackQueenSide) {
+            if self.can(Self::BLACK_QUEEN_SIDE) {
                 s.push('q');
             }
 

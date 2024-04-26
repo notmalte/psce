@@ -1,8 +1,8 @@
 use std::{fmt::Display, str::FromStr};
 
 use crate::engine::{
-    bitboard::{Bitboard, BitboardContainer, Square},
-    castling::CastlingRights,
+    bitboard::{BitboardContainer, Square},
+    castling::Castling,
     color::Color,
     piece::Piece,
 };
@@ -12,7 +12,7 @@ const FEN_INITIAL_POSITION: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR 
 pub struct Position {
     bitboards: BitboardContainer,
     color_to_move: Color,
-    castling_rights: CastlingRights,
+    castling: Castling,
     en_passant_square: Option<Square>,
 }
 
@@ -21,7 +21,7 @@ impl Position {
         Self {
             bitboards: BitboardContainer::empty(),
             color_to_move: Color::White,
-            castling_rights: CastlingRights::none(),
+            castling: Castling::NONE,
             en_passant_square: None,
         }
     }
@@ -78,7 +78,7 @@ impl Position {
             _ => return Err("Invalid side to move".to_string()),
         };
 
-        position.castling_rights = CastlingRights::from_str(parts[2])?;
+        position.castling = Castling::from_str(parts[2])?;
 
         position.en_passant_square = match parts[3] {
             "-" => None,
@@ -99,8 +99,8 @@ impl Position {
         self.color_to_move
     }
 
-    pub fn castling_rights(&self) -> CastlingRights {
-        self.castling_rights
+    pub fn castling(&self) -> Castling {
+        self.castling
     }
 
     pub fn en_passant_square(&self) -> Option<Square> {
@@ -113,7 +113,7 @@ impl Display for Position {
         writeln!(f, "{}\n", self.bitboards)?;
 
         writeln!(f, "Side to move: {}", self.color_to_move)?;
-        writeln!(f, "Castling rights: {}", self.castling_rights)?;
+        writeln!(f, "Castling rights: {}", self.castling)?;
         write!(
             f,
             "En passant square: {}",

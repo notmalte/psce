@@ -110,7 +110,7 @@ impl Square {
         Self::from_repr_unchecked(index)
     }
 
-    pub fn to_bb(self) -> Bitboard {
+    pub const fn to_bb(self) -> Bitboard {
         Bitboard(1 << self.0)
     }
 }

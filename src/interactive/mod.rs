@@ -14,4 +14,8 @@ pub fn run() {
     for m in mg.pawn().generate_moves(&pos) {
         println!("{}", m);
     }
+
+    for m in mg.king().generate_moves(&pos, &mg) {
+        println!("{}", m);
+    }
 }
