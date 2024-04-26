@@ -1,8 +1,12 @@
-use std::{fmt::Display, str::FromStr};
+use std::{
+    fmt::Display,
+    ops::{Add, Sub},
+    str::FromStr,
+};
 
 use crate::engine::bitboard::Bitboard;
 
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, PartialOrd, Debug)]
 pub struct Square(u8);
 
 #[allow(dead_code)]
@@ -78,6 +82,10 @@ impl Square {
         self.0
     }
 
+    pub fn to_usize(self) -> usize {
+        self.0 as usize
+    }
+
     pub fn from_repr(repr: u8) -> Option<Self> {
         if repr < 64 {
             Some(Square(repr))
@@ -140,6 +148,22 @@ impl Display for Square {
         let rank = (b'1' + (7 - y)) as char;
 
         write!(f, "{}{}", file, rank)
+    }
+}
+
+impl Add<u8> for Square {
+    type Output = Self;
+
+    fn add(self, rhs: u8) -> Self::Output {
+        Square(self.0 + rhs)
+    }
+}
+
+impl Sub<u8> for Square {
+    type Output = Self;
+
+    fn sub(self, rhs: u8) -> Self::Output {
+        Square(self.0 - rhs)
     }
 }
 

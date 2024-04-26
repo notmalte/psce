@@ -5,11 +5,13 @@ pub fn run() {
 
     let mg = MoveGen::new();
 
-    let moves = mg.knight().generate_moves(&pos);
-
     println!("{}", pos);
 
-    for m in moves {
+    for m in mg.knight().generate_moves(&pos) {
+        println!("{}", m);
+    }
+
+    for m in mg.pawn().generate_moves(&pos) {
         println!("{}", m);
     }
 }

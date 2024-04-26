@@ -1,5 +1,5 @@
 use crate::engine::{
-    bitboard::{Bitboard, NOT_FILE_A, NOT_FILE_AB, NOT_FILE_GH, NOT_FILE_H},
+    bitboard::{Bitboard, Square, NOT_FILE_A, NOT_FILE_AB, NOT_FILE_GH, NOT_FILE_H},
     color::Color,
     moves::{Move, MoveFlags},
     piece::Piece,
@@ -21,13 +21,13 @@ impl KnightMoveGen {
         let mut table = [Bitboard::empty(); 64];
 
         for square in Bitboard::all_squares() {
-            table[square.to_repr() as usize] = Self::mask_attacks(square);
+            table[square.to_usize()] = Self::mask_attacks(square);
         }
 
         table
     }
 
-    fn mask_attacks(square: crate::engine::bitboard::Square) -> Bitboard {
+    fn mask_attacks(square: Square) -> Bitboard {
         let mut attacks = Bitboard::empty();
         let bb = square.to_bb();
 
@@ -56,8 +56,8 @@ impl KnightMoveGen {
         let knights = position.bitboards().piece(piece);
 
         for from_square in knights.squares() {
-            let attacks = self.attack_table[from_square.to_repr() as usize]
-                & !position.bitboards().color(color);
+            let attacks =
+                self.attack_table[from_square.to_usize()] & !position.bitboards().color(color);
 
             for to_square in attacks.squares() {
                 let capture = position.bitboards().all().get(to_square);
@@ -73,5 +73,47 @@ impl KnightMoveGen {
         }
 
         moves
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_mask_attacks() {
+        let got = KnightMoveGen::mask_attacks(Square::A2);
+        let expected = Square::B4.to_bb() | Square::C3.to_bb() | Square::C1.to_bb();
+
+        assert_eq!(got, expected);
+
+        let got = KnightMoveGen::mask_attacks(Square::D4);
+        let expected = Square::B3.to_bb()
+            | Square::B5.to_bb()
+            | Square::C2.to_bb()
+            | Square::C6.to_bb()
+            | Square::E2.to_bb()
+            | Square::E6.to_bb()
+            | Square::F3.to_bb()
+            | Square::F5.to_bb();
+
+        assert_eq!(got, expected);
+    }
+
+    #[test]
+    fn test_generate_attack_table() {
+        let table = KnightMoveGen::generate_attack_table();
+
+        let got = table[Square::E3.to_usize()];
+        let expected = Square::C2.to_bb()
+            | Square::C4.to_bb()
+            | Square::D1.to_bb()
+            | Square::D5.to_bb()
+            | Square::F1.to_bb()
+            | Square::F5.to_bb()
+            | Square::G2.to_bb()
+            | Square::G4.to_bb();
+
+        assert_eq!(got, expected);
     }
 }

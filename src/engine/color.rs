@@ -13,6 +13,10 @@ impl Color {
     pub fn to_repr(self) -> u8 {
         self as u8
     }
+
+    pub fn to_usize(self) -> usize {
+        self as usize
+    }
 }
 
 impl Not for Color {

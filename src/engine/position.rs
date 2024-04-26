@@ -98,6 +98,14 @@ impl Position {
     pub fn color_to_move(&self) -> Color {
         self.color_to_move
     }
+
+    pub fn castling_rights(&self) -> CastlingRights {
+        self.castling_rights
+    }
+
+    pub fn en_passant_square(&self) -> Option<Square> {
+        self.en_passant_square
+    }
 }
 
 impl Display for Position {
