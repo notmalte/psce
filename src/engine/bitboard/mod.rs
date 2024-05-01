@@ -93,6 +93,10 @@ impl Bitboard {
     pub const fn shr(self, rhs: usize) -> Self {
         Self(self.0 >> rhs)
     }
+
+    pub const fn count_ones(self) -> u8 {
+        self.0.count_ones() as u8
+    }
 }
 
 impl Display for Bitboard {

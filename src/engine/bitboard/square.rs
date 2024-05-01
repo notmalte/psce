@@ -113,6 +113,13 @@ impl Square {
     pub const fn to_bb(self) -> Bitboard {
         Bitboard(1 << self.0)
     }
+
+    pub fn to_xy(self) -> (u8, u8) {
+        let x = self.0 % 8;
+        let y = self.0 / 8;
+
+        (x, y)
+    }
 }
 
 impl FromStr for Square {
@@ -141,8 +148,7 @@ impl FromStr for Square {
 
 impl Display for Square {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let x = self.0 % 8;
-        let y = self.0 / 8;
+        let (x, y) = self.to_xy();
 
         let file = (b'a' + x) as char;
         let rank = (b'1' + (7 - y)) as char;
