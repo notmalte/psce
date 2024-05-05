@@ -8,6 +8,8 @@ use crate::engine::{
 mod bishop;
 mod king;
 mod knight;
+mod magic;
+mod occupancy;
 mod pawn;
 
 pub struct MoveGen {

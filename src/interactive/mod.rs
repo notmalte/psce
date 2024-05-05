@@ -7,11 +7,15 @@ pub fn run() {
 
     println!("{}", pos);
 
+    for m in mg.pawn().generate_moves(&pos) {
+        println!("{}", m);
+    }
+
     for m in mg.knight().generate_moves(&pos) {
         println!("{}", m);
     }
 
-    for m in mg.pawn().generate_moves(&pos) {
+    for m in mg.bishop().generate_moves(&pos) {
         println!("{}", m);
     }
 
