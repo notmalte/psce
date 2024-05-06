@@ -110,6 +110,14 @@ impl Square {
         Self::from_repr_unchecked(index)
     }
 
+    pub fn from_xy_i8(x: i8, y: i8) -> Option<Self> {
+        if (0..8).contains(&x) && (0..8).contains(&y) {
+            Self::from_xy(x as u8, y as u8)
+        } else {
+            None
+        }
+    }
+
     pub const fn to_bb(self) -> Bitboard {
         Bitboard(1 << self.0)
     }
@@ -119,6 +127,12 @@ impl Square {
         let y = self.0 / 8;
 
         (x, y)
+    }
+
+    pub fn to_xy_i8(self) -> (i8, i8) {
+        let (x, y) = self.to_xy();
+
+        (x as i8, y as i8)
     }
 }
 

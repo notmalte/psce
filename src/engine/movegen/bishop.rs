@@ -2,7 +2,9 @@ use crate::engine::{
     bitboard::{Bitboard, Square},
     color::Color,
     movegen::{
-        magic::{calculate_magic_index, generate_magic_number_candidate, ARRAY_SIZE, MAX_ATTEMPTS},
+        magic::{
+            calculate_magic_index, generate_magic_number_candidate, ARRAY_SIZE_BISHOP, MAX_ATTEMPTS,
+        },
         occupancy::mask_occupancy,
     },
     moves::{Move, MoveFlags},
@@ -45,40 +47,34 @@ impl BishopMoveGen {
     fn mask_attack_candidates(square: Square) -> Bitboard {
         let mut attacks = Bitboard::empty();
 
-        let (square_x, square_y) = square.to_xy();
+        let (square_x, square_y) = square.to_xy_i8();
 
         let (mut x, mut y) = (square_x + 1, square_y + 1);
         while (x < 7) && (y < 7) {
-            attacks.set(Square::from_xy(x, y).unwrap());
+            attacks.set(Square::from_xy_i8(x, y).unwrap());
             x += 1;
             y += 1;
         }
 
-        if square_x > 0 && square_y > 0 {
-            let (mut x, mut y) = (square_x - 1, square_y - 1);
-            while (x > 0) && (y > 0) {
-                attacks.set(Square::from_xy(x, y).unwrap());
-                x -= 1;
-                y -= 1;
-            }
+        let (mut x, mut y) = (square_x - 1, square_y - 1);
+        while (x > 0) && (y > 0) {
+            attacks.set(Square::from_xy_i8(x, y).unwrap());
+            x -= 1;
+            y -= 1;
         }
 
-        if square_y > 0 {
-            let (mut x, mut y) = (square_x + 1, square_y - 1);
-            while (x < 7) && (y > 0) {
-                attacks.set(Square::from_xy(x, y).unwrap());
-                x += 1;
-                y -= 1;
-            }
+        let (mut x, mut y) = (square_x + 1, square_y - 1);
+        while (x < 7) && (y > 0) {
+            attacks.set(Square::from_xy_i8(x, y).unwrap());
+            x += 1;
+            y -= 1;
         }
 
-        if square_x > 0 {
-            let (mut x, mut y) = (square_x - 1, square_y + 1);
-            while (x > 0) && (y < 7) {
-                attacks.set(Square::from_xy(x, y).unwrap());
-                x -= 1;
-                y += 1;
-            }
+        let (mut x, mut y) = (square_x - 1, square_y + 1);
+        while (x > 0) && (y < 7) {
+            attacks.set(Square::from_xy_i8(x, y).unwrap());
+            x -= 1;
+            y += 1;
         }
 
         attacks
@@ -87,11 +83,11 @@ impl BishopMoveGen {
     fn mask_attacks(square: Square, occupancy: Bitboard) -> Bitboard {
         let mut attacks = Bitboard::empty();
 
-        let (square_x, square_y) = square.to_xy();
+        let (square_x, square_y) = square.to_xy_i8();
 
         let (mut x, mut y) = (square_x + 1, square_y + 1);
-        while (x < 7) && (y < 7) {
-            let s = Square::from_xy(x, y).unwrap();
+        while (x <= 7) && (y <= 7) {
+            let s = Square::from_xy_i8(x, y).unwrap();
             attacks.set(s);
 
             if occupancy.get(s) {
@@ -102,49 +98,43 @@ impl BishopMoveGen {
             y += 1;
         }
 
-        if square_x > 0 && square_y > 0 {
-            let (mut x, mut y) = (square_x - 1, square_y - 1);
-            while (x > 0) && (y > 0) {
-                let s = Square::from_xy(x, y).unwrap();
-                attacks.set(s);
+        let (mut x, mut y) = (square_x - 1, square_y - 1);
+        while (x >= 0) && (y >= 0) {
+            let s = Square::from_xy_i8(x, y).unwrap();
+            attacks.set(s);
 
-                if occupancy.get(s) {
-                    break;
-                }
-
-                x -= 1;
-                y -= 1;
+            if occupancy.get(s) {
+                break;
             }
+
+            x -= 1;
+            y -= 1;
         }
 
-        if square_y > 0 {
-            let (mut x, mut y) = (square_x + 1, square_y - 1);
-            while (x < 7) && (y > 0) {
-                let s = Square::from_xy(x, y).unwrap();
-                attacks.set(s);
+        let (mut x, mut y) = (square_x + 1, square_y - 1);
+        while (x <= 7) && (y >= 0) {
+            let s = Square::from_xy_i8(x, y).unwrap();
+            attacks.set(s);
 
-                if occupancy.get(s) {
-                    break;
-                }
-
-                x += 1;
-                y -= 1;
+            if occupancy.get(s) {
+                break;
             }
+
+            x += 1;
+            y -= 1;
         }
 
-        if square_x > 0 {
-            let (mut x, mut y) = (square_x - 1, square_y + 1);
-            while (x > 0) && (y < 7) {
-                let s = Square::from_xy(x, y).unwrap();
-                attacks.set(s);
+        let (mut x, mut y) = (square_x - 1, square_y + 1);
+        while (x >= 0) && (y <= 7) {
+            let s = Square::from_xy_i8(x, y).unwrap();
+            attacks.set(s);
 
-                if occupancy.get(s) {
-                    break;
-                }
-
-                x -= 1;
-                y += 1;
+            if occupancy.get(s) {
+                break;
             }
+
+            x -= 1;
+            y += 1;
         }
 
         attacks
@@ -171,8 +161,8 @@ impl BishopMoveGen {
     }
 
     fn generate_magic_number(square: Square) -> u64 {
-        let mut occupancies = [Bitboard::empty(); ARRAY_SIZE];
-        let mut attacks = [Bitboard::empty(); ARRAY_SIZE];
+        let mut occupancies = [Bitboard::empty(); ARRAY_SIZE_BISHOP];
+        let mut attacks = [Bitboard::empty(); ARRAY_SIZE_BISHOP];
 
         let candidate_mask = Self::mask_attack_candidates(square);
         let bits_in_mask = candidate_mask.count_ones();
@@ -193,7 +183,7 @@ impl BishopMoveGen {
                 continue;
             }
 
-            let mut used_attacks = [Bitboard::empty(); ARRAY_SIZE];
+            let mut used_attacks = [Bitboard::empty(); ARRAY_SIZE_BISHOP];
 
             for index in 0..index_upper_bound {
                 let magic_index =
