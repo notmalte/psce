@@ -1,7 +1,10 @@
 use crate::engine::{
     bitboard::Square,
     color::Color,
-    movegen::{bishop::BishopMoveGen, king::KingMoveGen, knight::KnightMoveGen, pawn::PawnMoveGen},
+    movegen::{
+        bishop::BishopMoveGen, king::KingMoveGen, knight::KnightMoveGen, pawn::PawnMoveGen,
+        rook::RookMoveGen,
+    },
     position::Position,
 };
 
@@ -11,12 +14,13 @@ mod knight;
 mod magic;
 mod occupancy;
 mod pawn;
+mod rook;
 
 pub struct MoveGen {
     pawn: PawnMoveGen,
     knight: KnightMoveGen,
     bishop: BishopMoveGen,
-    // rook: !,
+    rook: RookMoveGen,
     // queen: !,
     king: KingMoveGen,
 }
@@ -26,7 +30,7 @@ impl MoveGen {
         let pawn = PawnMoveGen::new();
         let knight = KnightMoveGen::new();
         let bishop = BishopMoveGen::new();
-        // let rook = RookMoveGen::new();
+        let rook = RookMoveGen::new();
         // let queen = QueenMoveGen::new();
         let king = KingMoveGen::new();
 
@@ -34,6 +38,7 @@ impl MoveGen {
             pawn,
             knight,
             bishop,
+            rook,
             king,
         }
     }
@@ -48,6 +53,10 @@ impl MoveGen {
 
     pub fn bishop(&self) -> &BishopMoveGen {
         &self.bishop
+    }
+
+    pub fn rook(&self) -> &RookMoveGen {
+        &self.rook
     }
 
     pub fn king(&self) -> &KingMoveGen {
