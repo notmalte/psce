@@ -12,6 +12,7 @@ use crate::engine::{
     position::Position,
 };
 
+#[derive(Clone)]
 pub struct RookMoveGen {
     attack_candidate_table: [Bitboard; 64],
     relevant_bits_table: [u8; 64],
@@ -202,7 +203,7 @@ impl RookMoveGen {
         table
     }
 
-    fn get_attacks(&self, square: Square, occupancy: Bitboard) -> Bitboard {
+    pub(super) fn get_attacks(&self, square: Square, occupancy: Bitboard) -> Bitboard {
         let masked_occupancy = occupancy & self.attack_candidate_table[square.to_usize()];
         let magic_number = self.magic_numbers[square.to_usize()];
         let relevant_bits = self.relevant_bits_table[square.to_usize()];

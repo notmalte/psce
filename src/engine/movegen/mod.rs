@@ -3,7 +3,7 @@ use crate::engine::{
     color::Color,
     movegen::{
         bishop::BishopMoveGen, king::KingMoveGen, knight::KnightMoveGen, pawn::PawnMoveGen,
-        rook::RookMoveGen,
+        queen::QueenMoveGen, rook::RookMoveGen,
     },
     position::Position,
 };
@@ -14,6 +14,7 @@ mod knight;
 mod magic;
 mod occupancy;
 mod pawn;
+mod queen;
 mod rook;
 
 pub struct MoveGen {
@@ -21,7 +22,7 @@ pub struct MoveGen {
     knight: KnightMoveGen,
     bishop: BishopMoveGen,
     rook: RookMoveGen,
-    // queen: !,
+    queen: QueenMoveGen,
     king: KingMoveGen,
 }
 
@@ -31,7 +32,7 @@ impl MoveGen {
         let knight = KnightMoveGen::new();
         let bishop = BishopMoveGen::new();
         let rook = RookMoveGen::new();
-        // let queen = QueenMoveGen::new();
+        let queen = QueenMoveGen::new(bishop.clone(), rook.clone());
         let king = KingMoveGen::new();
 
         Self {
@@ -39,6 +40,7 @@ impl MoveGen {
             knight,
             bishop,
             rook,
+            queen,
             king,
         }
     }
@@ -57,6 +59,10 @@ impl MoveGen {
 
     pub fn rook(&self) -> &RookMoveGen {
         &self.rook
+    }
+
+    pub fn queen(&self) -> &QueenMoveGen {
+        &self.queen
     }
 
     pub fn king(&self) -> &KingMoveGen {

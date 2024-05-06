@@ -23,6 +23,10 @@ pub fn run() {
         println!("{}", m);
     }
 
+    for m in mg.queen().generate_moves(&pos) {
+        println!("{}", m);
+    }
+
     for m in mg.king().generate_moves(&pos, &mg) {
         println!("{}", m);
     }
