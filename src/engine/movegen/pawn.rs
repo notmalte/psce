@@ -45,6 +45,10 @@ impl PawnMoveGen {
         attacks
     }
 
+    pub(super) fn get_attacks(&self, color: Color, square: Square) -> Bitboard {
+        self.attack_table[color.to_usize()][square.to_usize()]
+    }
+
     pub fn generate_moves(&self, position: &Position) -> Vec<Move> {
         let color = position.color_to_move();
 
@@ -131,7 +135,7 @@ impl PawnMoveGen {
                 }
             }
 
-            let attacks = self.attack_table[color.to_usize()][from_square.to_usize()];
+            let attacks = self.get_attacks(color, from_square);
             let captures = attacks & position.bitboards().color(!color);
 
             for to_square in captures.squares() {

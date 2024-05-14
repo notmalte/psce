@@ -62,6 +62,10 @@ impl Bitboard {
         self.0 == 0
     }
 
+    pub fn is_not_empty(self) -> bool {
+        !self.is_empty()
+    }
+
     pub fn last_square(self) -> Option<Square> {
         Square::from_repr(self.0.trailing_zeros() as u8)
     }

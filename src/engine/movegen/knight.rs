@@ -43,6 +43,10 @@ impl KnightMoveGen {
         attacks
     }
 
+    pub(super) fn get_attacks(&self, square: Square) -> Bitboard {
+        self.attack_table[square.to_usize()]
+    }
+
     pub fn generate_moves(&self, position: &Position) -> Vec<Move> {
         let color = position.color_to_move();
 
@@ -56,8 +60,7 @@ impl KnightMoveGen {
         let knights = position.bitboards().piece(piece);
 
         for from_square in knights.squares() {
-            let attacks =
-                self.attack_table[from_square.to_usize()] & !position.bitboards().color(color);
+            let attacks = self.get_attacks(from_square) & !position.bitboards().color(color);
 
             for to_square in attacks.squares() {
                 let capture = position.bitboards().all().get(to_square);

@@ -7,27 +7,7 @@ pub fn run() {
 
     println!("{}", pos);
 
-    for m in mg.pawn().generate_moves(&pos) {
-        println!("{}", m);
-    }
-
-    for m in mg.knight().generate_moves(&pos) {
-        println!("{}", m);
-    }
-
-    for m in mg.bishop().generate_moves(&pos) {
-        println!("{}", m);
-    }
-
-    for m in mg.rook().generate_moves(&pos) {
-        println!("{}", m);
-    }
-
-    for m in mg.queen().generate_moves(&pos) {
-        println!("{}", m);
-    }
-
-    for m in mg.king().generate_moves(&pos, &mg) {
+    for m in mg.generate_moves(&pos) {
         println!("{}", m);
     }
 }

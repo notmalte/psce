@@ -17,7 +17,7 @@ impl QueenMoveGen {
         Self { bishop, rook }
     }
 
-    fn get_attacks(&self, square: Square, occupancy: Bitboard) -> Bitboard {
+    pub(super) fn get_attacks(&self, square: Square, occupancy: Bitboard) -> Bitboard {
         self.bishop.get_attacks(square, occupancy) | self.rook.get_attacks(square, occupancy)
     }
 
