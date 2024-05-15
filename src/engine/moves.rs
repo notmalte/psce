@@ -27,6 +27,26 @@ impl Move {
             flags,
         }
     }
+
+    pub fn from(&self) -> Square {
+        self.from
+    }
+
+    pub fn to(&self) -> Square {
+        self.to
+    }
+
+    pub fn piece(&self) -> Piece {
+        self.piece
+    }
+
+    pub fn promotion(&self) -> Option<Piece> {
+        self.promotion
+    }
+
+    pub fn flags(&self) -> MoveFlags {
+        self.flags
+    }
 }
 
 impl Display for Move {

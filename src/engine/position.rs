@@ -4,11 +4,14 @@ use crate::engine::{
     bitboard::{BitboardContainer, Square},
     castling::Castling,
     color::Color,
+    movegen::MoveGen,
+    moves::Move,
     piece::Piece,
 };
 
 const FEN_INITIAL_POSITION: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
+#[derive(Clone)]
 pub struct Position {
     bitboards: BitboardContainer,
     color_to_move: Color,
@@ -105,6 +108,127 @@ impl Position {
 
     pub fn en_passant_square(&self) -> Option<Square> {
         self.en_passant_square
+    }
+
+    pub fn make_move(&self, mg: &MoveGen, m: &Move) -> Option<Self> {
+        let mut clone = self.clone();
+
+        clone.apply_move(m);
+
+        let king = match self.color_to_move {
+            Color::White => Piece::WhiteKing,
+            Color::Black => Piece::BlackKing,
+        };
+
+        let king_square = self.bitboards.piece(king).last_square().unwrap();
+
+        if mg.is_attacked(&clone, king_square, clone.color_to_move) {
+            return None;
+        }
+
+        Some(clone)
+    }
+
+    fn apply_move(&mut self, m: &Move) {
+        let opponent = !self.color_to_move;
+
+        self.bitboards.piece_mut(m.piece()).clear(m.from());
+        self.bitboards.color_mut(self.color_to_move).clear(m.from());
+
+        if let Some(promoted) = m.promotion() {
+            self.bitboards.piece_mut(promoted).set(m.to());
+        } else {
+            self.bitboards.piece_mut(m.piece()).set(m.to());
+        }
+        self.bitboards.color_mut(self.color_to_move).set(m.to());
+
+        if m.flags().is_capture() {
+            if m.flags().is_en_passant() {
+                let (square, piece) = match self.color_to_move {
+                    Color::White => (m.to() + 8, Piece::BlackPawn),
+                    Color::Black => (m.to() - 8, Piece::WhitePawn),
+                };
+
+                self.bitboards.piece_mut(piece).clear(square);
+                self.bitboards.color_mut(opponent).clear(square);
+            } else {
+                let pieces = match self.color_to_move {
+                    Color::White => Piece::BLACK_PIECES,
+                    Color::Black => Piece::WHITE_PIECES,
+                };
+
+                for piece in pieces {
+                    self.bitboards.piece_mut(piece).clear(m.to());
+                }
+                self.bitboards.color_mut(opponent).clear(m.to());
+
+                let castling_mask = match m.to() {
+                    Square::A8 => Castling::BLACK_QUEEN_SIDE,
+                    Square::H8 => Castling::BLACK_KING_SIDE,
+                    Square::A1 => Castling::WHITE_QUEEN_SIDE,
+                    Square::H1 => Castling::WHITE_KING_SIDE,
+                    _ => Castling::NONE,
+                };
+
+                self.castling.clear(castling_mask);
+            }
+        }
+
+        if m.flags().is_double_push() {
+            self.en_passant_square = match self.color_to_move {
+                Color::White => Some(m.from() + 8),
+                Color::Black => Some(m.from() - 8),
+            };
+        } else {
+            self.en_passant_square = None;
+        }
+
+        if m.flags().is_castling() {
+            let (rook_from, rook_to) = match m.to() {
+                Square::C8 => (Square::A8, Square::D8),
+                Square::G8 => (Square::H8, Square::F8),
+                Square::C1 => (Square::A1, Square::D1),
+                Square::G1 => (Square::H1, Square::F1),
+                _ => unreachable!(),
+            };
+
+            let rook = match self.color_to_move {
+                Color::White => Piece::WhiteRook,
+                Color::Black => Piece::BlackRook,
+            };
+
+            self.bitboards.piece_mut(rook).clear(rook_from);
+            self.bitboards
+                .color_mut(self.color_to_move)
+                .clear(rook_from);
+
+            self.bitboards.piece_mut(rook).set(rook_to);
+            self.bitboards.color_mut(self.color_to_move).set(rook_to);
+
+            let castling_mask = match self.color_to_move {
+                Color::White => Castling::WHITE_ALL,
+                Color::Black => Castling::BLACK_ALL,
+            };
+
+            self.castling.clear(castling_mask);
+        } else {
+            let castling_mask = match m.from() {
+                Square::A8 => Castling::BLACK_QUEEN_SIDE,
+                Square::E8 => Castling::BLACK_ALL,
+                Square::H8 => Castling::BLACK_KING_SIDE,
+                Square::A1 => Castling::WHITE_QUEEN_SIDE,
+                Square::E1 => Castling::WHITE_ALL,
+                Square::H1 => Castling::WHITE_KING_SIDE,
+                _ => Castling::NONE,
+            };
+
+            self.castling.clear(castling_mask);
+        }
+
+        *self.bitboards.all_mut() =
+            self.bitboards.color(Color::White) | self.bitboards.color(Color::Black);
+
+        self.color_to_move = opponent;
     }
 }
 

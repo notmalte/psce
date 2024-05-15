@@ -3,7 +3,7 @@ use std::ops::Not;
 use strum::Display;
 
 #[repr(u8)]
-#[derive(Clone, Copy, PartialEq, Display)]
+#[derive(Clone, Copy, PartialEq, Display, Debug)]
 pub enum Color {
     White,
     Black,

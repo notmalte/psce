@@ -49,7 +49,11 @@ impl KingMoveGen {
         self.attack_table[square.to_usize()]
     }
 
-    pub fn generate_moves(&self, position: &Position, move_gen: &MoveGen) -> Vec<Move> {
+    pub fn generate_pseudo_legal_moves(
+        &self,
+        position: &Position,
+        move_gen: &MoveGen,
+    ) -> Vec<Move> {
         let color = position.color_to_move();
 
         let piece = match color {

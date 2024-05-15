@@ -6,6 +6,7 @@ use crate::engine::{
     piece::Piece,
 };
 
+#[derive(Clone)]
 pub struct BitboardContainer {
     pieces: [Bitboard; 12],
     colors: [Bitboard; 2],

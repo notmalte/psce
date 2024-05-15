@@ -21,7 +21,7 @@ impl QueenMoveGen {
         self.bishop.get_attacks(square, occupancy) | self.rook.get_attacks(square, occupancy)
     }
 
-    pub fn generate_moves(&self, position: &Position) -> Vec<Move> {
+    pub fn generate_pseudo_legal_moves(&self, position: &Position) -> Vec<Move> {
         let color = position.color_to_move();
 
         let piece = match color {

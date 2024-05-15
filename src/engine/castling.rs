@@ -8,8 +8,10 @@ pub struct Castling(u8);
 impl Castling {
     pub const WHITE_KING_SIDE: Self = Castling(0b0001);
     pub const WHITE_QUEEN_SIDE: Self = Castling(0b0010);
+    pub const WHITE_ALL: Self = Castling(0b0011);
     pub const BLACK_KING_SIDE: Self = Castling(0b0100);
     pub const BLACK_QUEEN_SIDE: Self = Castling(0b1000);
+    pub const BLACK_ALL: Self = Castling(0b1100);
     pub const NONE: Self = Castling(0b0000);
     pub const ALL: Self = Castling(0b1111);
 

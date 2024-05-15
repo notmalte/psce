@@ -7,7 +7,7 @@ pub fn run() {
 
     println!("{}", pos);
 
-    for m in mg.generate_moves(&pos) {
+    for m in mg.generate_pseudo_legal_moves(&pos) {
         println!("{}", m);
     }
 }

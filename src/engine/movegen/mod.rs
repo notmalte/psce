@@ -71,7 +71,7 @@ impl MoveGen {
         &self.king
     }
 
-    fn is_attacked(&self, position: &Position, square: Square, attacker_color: Color) -> bool {
+    pub fn is_attacked(&self, position: &Position, square: Square, attacker_color: Color) -> bool {
         let (pawn, knight, bishop, rook, queen, king) = match attacker_color {
             Color::White => (
                 Piece::WhitePawn,
@@ -129,15 +129,27 @@ impl MoveGen {
         false
     }
 
-    pub fn generate_moves(&self, position: &Position) -> Vec<Move> {
+    pub fn generate_pseudo_legal_moves(&self, position: &Position) -> Vec<Move> {
         let mut moves = vec![];
 
-        moves.extend(self.pawn.generate_moves(position));
-        moves.extend(self.knight.generate_moves(position));
-        moves.extend(self.bishop.generate_moves(position));
-        moves.extend(self.rook.generate_moves(position));
-        moves.extend(self.queen.generate_moves(position));
-        moves.extend(self.king.generate_moves(position, self));
+        moves.extend(self.pawn.generate_pseudo_legal_moves(position));
+        moves.extend(self.knight.generate_pseudo_legal_moves(position));
+        moves.extend(self.bishop.generate_pseudo_legal_moves(position));
+        moves.extend(self.rook.generate_pseudo_legal_moves(position));
+        moves.extend(self.queen.generate_pseudo_legal_moves(position));
+        moves.extend(self.king.generate_pseudo_legal_moves(position, self));
+
+        moves
+    }
+
+    pub fn generate_legal_moves(&self, position: &Position) -> Vec<(Move, Position)> {
+        let mut moves = vec![];
+
+        for pseudo_move in self.generate_pseudo_legal_moves(position) {
+            if let Some(new_position) = position.make_move(self, &pseudo_move) {
+                moves.push((pseudo_move, new_position));
+            }
+        }
 
         moves
     }
