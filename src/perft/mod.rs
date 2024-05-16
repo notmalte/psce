@@ -1,5 +1,7 @@
 use std::time::Instant;
 
+use rayon::prelude::*;
+
 use crate::engine::{movegen::MoveGen, position::Position};
 
 pub fn run(depth: u8) {
@@ -30,11 +32,11 @@ fn perft(mg: &MoveGen, pos: &Position, depth: u8) -> u64 {
         return 1;
     }
 
-    let mut nodes = 0;
+    let moves = mg.generate_legal_moves(pos);
 
-    for (_, p) in mg.generate_legal_moves(pos) {
-        nodes += perft(mg, &p, depth - 1);
+    if depth < 4 {
+        moves.iter().map(|(_, p)| perft(mg, p, depth - 1)).sum()
+    } else {
+        moves.par_iter().map(|(_, p)| perft(mg, p, depth - 1)).sum()
     }
-
-    nodes
 }

@@ -10,13 +10,11 @@ mod uci;
 #[command(version, about)]
 struct Args {
     /// Run in UCI mode
-    #[arg(long)]
-    #[clap(group = "mode")]
+    #[arg(long, group = "mode")]
     uci: bool,
 
     /// Run PERFT tests
-    #[arg(long, value_name = "DEPTH")]
-    #[clap(group = "mode")]
+    #[arg(long, value_name = "DEPTH", group = "mode")]
     perft: Option<u8>,
 }
 

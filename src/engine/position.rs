@@ -120,7 +120,7 @@ impl Position {
             Color::Black => Piece::BlackKing,
         };
 
-        let king_square = self.bitboards.piece(king).last_square().unwrap();
+        let king_square = clone.bitboards.piece(king).last_square().unwrap();
 
         if mg.is_attacked(&clone, king_square, clone.color_to_move) {
             return None;
@@ -176,8 +176,8 @@ impl Position {
 
         if m.flags().is_double_push() {
             self.en_passant_square = match self.color_to_move {
-                Color::White => Some(m.from() + 8),
-                Color::Black => Some(m.from() - 8),
+                Color::White => Some(m.to() + 8),
+                Color::Black => Some(m.to() - 8),
             };
         } else {
             self.en_passant_square = None;
