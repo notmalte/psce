@@ -1,9 +1,5 @@
 use clap::Parser;
-
-mod engine;
-mod interactive;
-mod perft;
-mod uci;
+use psce::{interactive, perft, uci};
 
 /// Pretty Solid Chess Engine
 #[derive(Parser)]

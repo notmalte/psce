@@ -10,3 +10,10 @@ clap = { version = "4.5.4", features = ["derive"] }
 fastrand = "2.1.0"
 rayon = "1.10.0"
 strum = { version = "0.26.2", features = ["derive"] }
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+[[bench]]
+name = "movegen"
+harness = false

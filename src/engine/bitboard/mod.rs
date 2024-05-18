@@ -47,7 +47,7 @@ impl Bitboard {
     }
 
     pub fn get(self, square: Square) -> bool {
-        !(self & square.to_bb()).is_empty()
+        (self & square.to_bb()).is_not_empty()
     }
 
     pub fn set(&mut self, square: Square) {

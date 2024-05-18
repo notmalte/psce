@@ -1,5 +1,5 @@
 use crate::engine::{
-    bitboard::{Bitboard, Square, NOT_FILE_A, NOT_FILE_H},
+    bitboard::{Bitboard, Square, NOT_FILE_A, NOT_FILE_H, RANK_1, RANK_4, RANK_5, RANK_8},
     color::Color,
     moves::{Move, MoveFlags},
     piece::Piece,
@@ -57,14 +57,14 @@ impl PawnMoveGen {
             Color::Black => Piece::BlackPawn,
         };
 
-        let promotion_range = match color {
-            Color::White => Square::A8..=Square::H8,
-            Color::Black => Square::A1..=Square::H1,
+        let promotion_rank = match color {
+            Color::White => RANK_8,
+            Color::Black => RANK_1,
         };
 
-        let home_range = match color {
-            Color::White => Square::A2..=Square::H2,
-            Color::Black => Square::A7..=Square::H7,
+        let double_push_rank = match color {
+            Color::White => RANK_4,
+            Color::Black => RANK_5,
         };
 
         let promotion_pieces = match color {
@@ -85,91 +85,161 @@ impl PawnMoveGen {
         let mut moves = vec![];
 
         let pawns = position.bitboards().piece(piece);
+        let all = position.bitboards().all();
+        let opponent = position.bitboards().color(!color);
 
-        for from_square in pawns.squares() {
-            if promotion_range.contains(&from_square) {
-                continue;
-            }
-
-            let to_square = match color {
-                Color::White => from_square - 8,
-                Color::Black => from_square + 8,
+        let single_pushes = !all
+            & match color {
+                Color::White => pawns >> 8,
+                Color::Black => pawns << 8,
             };
 
-            if !position.bitboards().all().get(to_square) {
-                if promotion_range.contains(&to_square) {
-                    for promotion_piece in promotion_pieces {
-                        moves.push(Move::new(
-                            from_square,
-                            to_square,
-                            piece,
-                            Some(promotion_piece),
-                            MoveFlags::NONE,
-                        ));
-                    }
-                } else {
+        for to_square in single_pushes.squares() {
+            let from_square = match color {
+                Color::White => to_square + 8,
+                Color::Black => to_square - 8,
+            };
+
+            if promotion_rank.get(to_square) {
+                for promotion_piece in promotion_pieces {
                     moves.push(Move::new(
                         from_square,
                         to_square,
                         piece,
-                        None,
+                        Some(promotion_piece),
                         MoveFlags::NONE,
                     ));
-
-                    if home_range.contains(&from_square) {
-                        let double_push_square = match color {
-                            Color::White => from_square - 16,
-                            Color::Black => from_square + 16,
-                        };
-
-                        if !position.bitboards().all().get(double_push_square) {
-                            moves.push(Move::new(
-                                from_square,
-                                double_push_square,
-                                piece,
-                                None,
-                                MoveFlags::DOUBLE_PUSH,
-                            ));
-                        }
-                    }
                 }
+            } else {
+                moves.push(Move::new(
+                    from_square,
+                    to_square,
+                    piece,
+                    None,
+                    MoveFlags::NONE,
+                ));
             }
+        }
 
-            let attacks = self.get_attacks(color, from_square);
-            let captures = attacks & position.bitboards().color(!color);
+        let double_pushes = !all
+            & double_push_rank
+            & match color {
+                Color::White => single_pushes >> 8,
+                Color::Black => single_pushes << 8,
+            };
 
-            for to_square in captures.squares() {
-                if promotion_range.contains(&to_square) {
-                    for promotion_piece in promotion_pieces {
-                        moves.push(Move::new(
-                            from_square,
-                            to_square,
-                            piece,
-                            Some(promotion_piece),
-                            MoveFlags::CAPTURE,
-                        ));
-                    }
-                } else {
+        for to_square in double_pushes.squares() {
+            let from_square = match color {
+                Color::White => to_square + 16,
+                Color::Black => to_square - 16,
+            };
+
+            moves.push(Move::new(
+                from_square,
+                to_square,
+                piece,
+                None,
+                MoveFlags::DOUBLE_PUSH,
+            ));
+        }
+
+        let east_attacks = match color {
+            Color::White => pawns >> 9,
+            Color::Black => pawns << 7,
+        } & NOT_FILE_H;
+
+        let east_captures = east_attacks & opponent;
+
+        for to_square in east_captures.squares() {
+            let from_square = match color {
+                Color::White => to_square + 9,
+                Color::Black => to_square - 7,
+            };
+
+            if promotion_rank.get(to_square) {
+                for promotion_piece in promotion_pieces {
                     moves.push(Move::new(
                         from_square,
                         to_square,
                         piece,
-                        None,
+                        Some(promotion_piece),
                         MoveFlags::CAPTURE,
                     ));
                 }
+            } else {
+                moves.push(Move::new(
+                    from_square,
+                    to_square,
+                    piece,
+                    None,
+                    MoveFlags::CAPTURE,
+                ));
             }
+        }
 
-            if let Some(en_passant_square) = position.en_passant_square() {
-                if attacks.get(en_passant_square) {
+        let west_attacks = match color {
+            Color::White => pawns >> 7,
+            Color::Black => pawns << 9,
+        } & NOT_FILE_A;
+
+        let west_captures = west_attacks & opponent;
+
+        for to_square in west_captures.squares() {
+            let from_square = match color {
+                Color::White => to_square + 7,
+                Color::Black => to_square - 9,
+            };
+
+            if promotion_rank.get(to_square) {
+                for promotion_piece in promotion_pieces {
                     moves.push(Move::new(
                         from_square,
-                        en_passant_square,
+                        to_square,
                         piece,
-                        None,
-                        MoveFlags::CAPTURE | MoveFlags::EN_PASSANT,
+                        Some(promotion_piece),
+                        MoveFlags::CAPTURE,
                     ));
                 }
+            } else {
+                moves.push(Move::new(
+                    from_square,
+                    to_square,
+                    piece,
+                    None,
+                    MoveFlags::CAPTURE,
+                ));
+            }
+        }
+
+        if let Some(en_passant_square) = position.en_passant_square() {
+            if east_attacks.get(en_passant_square) {
+                let from_square = match color {
+                    Color::White => en_passant_square + 9,
+                    Color::Black => en_passant_square - 7,
+                };
+
+                moves.push(Move::new(
+                    from_square,
+                    en_passant_square,
+                    piece,
+                    None,
+                    MoveFlags::CAPTURE | MoveFlags::EN_PASSANT,
+                ));
+            }
+
+            if west_attacks.get(en_passant_square) {
+                let from_square = match color {
+                    Color::White => en_passant_square + 7,
+                    Color::Black => en_passant_square - 9,
+                };
+
+                moves.push(Move::new(
+                    from_square,
+                    en_passant_square,
+                    piece,
+                    None,
+                    MoveFlags::CAPTURE | MoveFlags::EN_PASSANT,
+                ));
             }
         }
 

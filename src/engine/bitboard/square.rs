@@ -197,6 +197,15 @@ pub const NOT_FILE_H: Bitboard = FILE_H.not();
 pub const NOT_FILE_AB: Bitboard = (FILE_A.bitor(FILE_B)).not();
 pub const NOT_FILE_GH: Bitboard = (FILE_G.bitor(FILE_H)).not();
 
+pub const RANK_1: Bitboard = Bitboard(0xFF00000000000000);
+pub const RANK_2: Bitboard = RANK_1.shr(8);
+pub const RANK_3: Bitboard = RANK_1.shr(2 * 8);
+pub const RANK_4: Bitboard = RANK_1.shr(3 * 8);
+pub const RANK_5: Bitboard = RANK_1.shr(4 * 8);
+pub const RANK_6: Bitboard = RANK_1.shr(5 * 8);
+pub const RANK_7: Bitboard = RANK_1.shr(6 * 8);
+pub const RANK_8: Bitboard = RANK_1.shr(7 * 8);
+
 #[cfg(test)]
 mod tests {
     use super::*;
