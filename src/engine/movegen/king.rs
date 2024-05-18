@@ -149,3 +149,9 @@ impl KingMoveGen {
         moves
     }
 }
+
+impl Default for KingMoveGen {
+    fn default() -> Self {
+        Self::new()
+    }
+}

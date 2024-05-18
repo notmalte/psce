@@ -154,3 +154,9 @@ impl MoveGen {
         moves
     }
 }
+
+impl Default for MoveGen {
+    fn default() -> Self {
+        Self::new()
+    }
+}

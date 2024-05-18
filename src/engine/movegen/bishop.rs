@@ -273,3 +273,9 @@ impl BishopMoveGen {
         moves
     }
 }
+
+impl Default for BishopMoveGen {
+    fn default() -> Self {
+        Self::new()
+    }
+}

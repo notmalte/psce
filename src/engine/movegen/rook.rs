@@ -245,3 +245,9 @@ impl RookMoveGen {
         moves
     }
 }
+
+impl Default for RookMoveGen {
+    fn default() -> Self {
+        Self::new()
+    }
+}

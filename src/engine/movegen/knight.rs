@@ -79,6 +79,12 @@ impl KnightMoveGen {
     }
 }
 
+impl Default for KnightMoveGen {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
