@@ -10,7 +10,7 @@ use psce::engine::{
 fn movegen_benchmark(c: &mut Criterion) {
     let mg = MoveGen::new();
 
-    let positions = vec![
+    let positions = [
         Position::initial(),
         Position::from_fen(FEN_TEST_POSITION_1).unwrap(),
         Position::from_fen(FEN_TEST_POSITION_2).unwrap(),

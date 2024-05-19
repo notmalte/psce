@@ -27,7 +27,7 @@ pub fn run(depth: u8) {
     }
 }
 
-fn count_nodes(mg: &MoveGen, pos: &Position, depth: u8) -> u64 {
+pub fn count_nodes(mg: &MoveGen, pos: &Position, depth: u8) -> u64 {
     if depth == 0 {
         return 1;
     }
