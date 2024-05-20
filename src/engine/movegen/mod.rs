@@ -2,8 +2,8 @@ use crate::engine::{
     bitboard::Square,
     color::Color,
     movegen::{
-        bishop::BishopMoveGen, king::KingMoveGen, knight::KnightMoveGen, pawn::PawnMoveGen,
-        queen::QueenMoveGen, rook::RookMoveGen,
+        bishop::BishopMoveGen, king::KingMoveGen, knight::KnightMoveGen, magic::MagicNumbers,
+        pawn::PawnMoveGen, queen::QueenMoveGen, rook::RookMoveGen,
     },
     moves::Move,
     piece::Piece,
@@ -34,6 +34,24 @@ impl MoveGen {
         let knight = KnightMoveGen::new();
         let bishop = BishopMoveGen::new();
         let rook = RookMoveGen::new();
+        let queen = QueenMoveGen::new(bishop.clone(), rook.clone());
+        let king = KingMoveGen::new();
+
+        Self {
+            pawn,
+            knight,
+            bishop,
+            rook,
+            queen,
+            king,
+        }
+    }
+
+    pub fn fresh() -> Self {
+        let pawn = PawnMoveGen::new();
+        let knight = KnightMoveGen::new();
+        let bishop = BishopMoveGen::fresh();
+        let rook = RookMoveGen::fresh();
         let queen = QueenMoveGen::new(bishop.clone(), rook.clone());
         let king = KingMoveGen::new();
 
@@ -152,6 +170,13 @@ impl MoveGen {
         }
 
         moves
+    }
+
+    pub fn magic_numbers(&self) -> MagicNumbers {
+        MagicNumbers {
+            bishop: self.bishop.magic_numbers(),
+            rook: self.rook.magic_numbers(),
+        }
     }
 }
 

@@ -4,6 +4,7 @@ use crate::engine::{
     movegen::{
         magic::{
             calculate_magic_index, generate_magic_number_candidate, ARRAY_SIZE_ROOK, MAX_ATTEMPTS,
+            PRECOMPUTED_MAGIC_NUMBERS,
         },
         occupancy::mask_occupancy,
     },
@@ -22,6 +23,20 @@ pub struct RookMoveGen {
 
 impl RookMoveGen {
     pub fn new() -> Self {
+        let attack_candidate_table = Self::generate_attack_candidate_table();
+        let relevant_bits_table = Self::generate_relevant_bits_table(&attack_candidate_table);
+        let magic_numbers = PRECOMPUTED_MAGIC_NUMBERS.rook;
+        let attack_table = Self::generate_attack_table(&attack_candidate_table, &magic_numbers);
+
+        Self {
+            attack_candidate_table,
+            relevant_bits_table,
+            magic_numbers,
+            attack_table,
+        }
+    }
+
+    pub fn fresh() -> Self {
         let attack_candidate_table = Self::generate_attack_candidate_table();
         let relevant_bits_table = Self::generate_relevant_bits_table(&attack_candidate_table);
         let magic_numbers = Self::generate_magic_numbers();
@@ -243,6 +258,10 @@ impl RookMoveGen {
         }
 
         moves
+    }
+
+    pub fn magic_numbers(&self) -> [u64; 64] {
+        self.magic_numbers
     }
 }
 
