@@ -5,3 +5,4 @@ pub mod movegen;
 pub mod moves;
 pub mod piece;
 pub mod position;
+pub mod search;
