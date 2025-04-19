@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Castling(u8);
@@ -47,5 +47,33 @@ impl FromStr for Castling {
         }
 
         Ok(cstl)
+    }
+}
+
+impl Display for Castling {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if *self == Self::NONE {
+            write!(f, "-")
+        } else {
+            let mut s = String::new();
+
+            if self.can(Self::WHITE_KING_SIDE) {
+                s.push('K');
+            }
+
+            if self.can(Self::WHITE_QUEEN_SIDE) {
+                s.push('Q');
+            }
+
+            if self.can(Self::BLACK_KING_SIDE) {
+                s.push('k');
+            }
+
+            if self.can(Self::BLACK_QUEEN_SIDE) {
+                s.push('q');
+            }
+
+            write!(f, "{}", s)
+        }
     }
 }

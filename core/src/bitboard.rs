@@ -134,27 +134,6 @@ impl Shr<usize> for Bitboard {
     }
 }
 
-pub const fn sq(rank: u8, file: u8) -> u8 {
-    rank * 8 + file
-}
-
-pub fn sq_from_str(s: &str) -> Option<u8> {
-    let chars: Vec<_> = s.to_lowercase().chars().collect();
-
-    if chars.len() != 2 {
-        return None;
-    }
-
-    let file = chars[0];
-    let rank = chars[1];
-
-    if !('a'..='h').contains(&file) || !('1'..='8').contains(&rank) {
-        return None;
-    }
-
-    Some(sq(rank as u8 - b'1', file as u8 - b'a'))
-}
-
 pub const FILE_A: Bitboard = Bitboard(0x0101010101010101u64);
 pub const FILE_B: Bitboard = FILE_A.shl(1);
 pub const FILE_G: Bitboard = FILE_A.shl(6);
@@ -213,15 +192,17 @@ impl BitboardContainer {
 
 #[cfg(test)]
 mod tests {
+    use crate::Square;
+
     use super::*;
 
     #[test]
     fn test_count() {
         let mut bb = Bitboard::empty();
-        bb.set(sq(0, 0));
-        bb.set(sq(0, 7));
-        bb.set(sq(7, 0));
-        bb.set(sq(7, 7));
+        bb.set(Square::A1);
+        bb.set(Square::H1);
+        bb.set(Square::A8);
+        bb.set(Square::H8);
         assert_eq!(bb.count(), 4);
 
         assert_eq!(FILE_A.count(), 8);

@@ -1,8 +1,6 @@
-use strum::EnumIter;
-
 use crate::color::Color;
 
-#[derive(Copy, Clone, PartialEq, Debug, EnumIter)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Piece {
     Pawn,
     Knight,
@@ -13,6 +11,15 @@ pub enum Piece {
 }
 
 impl Piece {
+    pub const ALL: [Self; 6] = [
+        Self::Pawn,
+        Self::Knight,
+        Self::Bishop,
+        Self::Rook,
+        Self::Queen,
+        Self::King,
+    ];
+
     pub fn from_char(c: char) -> Option<Self> {
         match c.to_ascii_lowercase() {
             'p' => Some(Self::Pawn),
