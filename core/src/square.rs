@@ -1,3 +1,5 @@
+use crate::Bitboard;
+
 pub struct Square {}
 
 #[allow(dead_code)]
@@ -82,6 +84,10 @@ impl Square {
 
     pub fn to_rf(sq: u8) -> (u8, u8) {
         (sq / 8, sq % 8)
+    }
+
+    pub fn to_bb(sq: u8) -> Bitboard {
+        Bitboard::new(1 << sq)
     }
 
     pub fn from_str(s: &str) -> Option<u8> {

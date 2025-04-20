@@ -7,6 +7,8 @@ mod position;
 mod square;
 mod undo;
 
+pub use bitboard::Bitboard;
+pub use color::Color;
 pub use moves::{Move, MoveFlags};
 pub use piece::Piece;
 pub use position::Position;

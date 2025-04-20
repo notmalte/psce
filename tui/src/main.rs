@@ -1,19 +1,17 @@
-use core::{Move, MoveFlags, Piece, Position, Square};
+use core::Position;
+
+use movegen::MoveGen;
 
 fn main() {
+    let mg = MoveGen::new();
+
     let mut position = Position::initial();
     println!("{}", position);
 
-    let mv = Move::new(
-        Square::E2,
-        Square::E4,
-        Piece::Pawn,
-        None,
-        MoveFlags::DOUBLE_PUSH,
-    );
-    let undo = position.make_move(&mv);
-    println!("{}", position);
+    let moves = mg.pseudo_legals(&position);
 
-    position.undo_move(&mv, &undo);
-    println!("{}", position);
+    println!("{} pseudo-legal moves:", moves.len());
+    for m in moves {
+        println!("{}", m);
+    }
 }

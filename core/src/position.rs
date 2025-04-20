@@ -108,8 +108,28 @@ impl Position {
         Ok(position)
     }
 
+    pub fn bitboards(&self) -> &BitboardContainer {
+        &self.bitboards
+    }
+
     pub fn side_to_move(&self) -> Color {
         self.side_to_move
+    }
+
+    pub fn castling(&self) -> Castling {
+        self.castling
+    }
+
+    pub fn en_passant_square(&self) -> Option<u8> {
+        self.en_passant_square
+    }
+
+    pub fn halfmove_clock(&self) -> u8 {
+        self.halfmove_clock
+    }
+
+    pub fn fullmove_number(&self) -> u16 {
+        self.fullmove_number
     }
 
     pub fn make_move(&mut self, mv: &Move) -> Undo {

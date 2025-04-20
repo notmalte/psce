@@ -1,6 +1,6 @@
-use std::ops::BitOr;
+use std::{fmt::Display, ops::BitOr};
 
-use crate::piece::Piece;
+use crate::{Square, piece::Piece};
 
 #[derive(Clone, Debug)]
 pub struct Move {
@@ -40,6 +40,18 @@ impl Move {
 
     pub fn flags(&self) -> MoveFlags {
         self.flags
+    }
+}
+
+impl Display for Move {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}{}{}",
+            Square::to_str(self.from),
+            if self.flags.is_capture() { "x" } else { "" },
+            Square::to_str(self.to),
+        )
     }
 }
 

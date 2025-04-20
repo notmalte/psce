@@ -27,8 +27,16 @@ use crate::{color::Color, piece::Piece};
 pub struct Bitboard(u64);
 
 impl Bitboard {
+    pub fn new(bb: u64) -> Self {
+        Self(bb)
+    }
+
     pub fn empty() -> Self {
         Self(0)
+    }
+
+    pub fn all_squares() -> BitboardAllSquaresIterator {
+        BitboardAllSquaresIterator::new()
     }
 
     pub fn get(&self, sq: u8) -> bool {
@@ -47,14 +55,23 @@ impl Bitboard {
         self.0 == 0
     }
 
-    pub fn pop(&mut self) -> Option<u8> {
+    pub fn last_square(&self) -> Option<u8> {
         if self.is_empty() {
             None
         } else {
-            let sq = self.0.trailing_zeros() as u8;
-            self.clear(sq);
-            Some(sq)
+            Some(self.0.trailing_zeros() as u8)
         }
+    }
+
+    pub fn pop_square(&mut self) -> Option<u8> {
+        let sq = self.last_square()?;
+        self.clear(sq);
+
+        Some(sq)
+    }
+
+    pub fn squares(self) -> BitboardSetSquaresIterator {
+        BitboardSetSquaresIterator::new(self)
     }
 
     pub const fn count(&self) -> u8 {
@@ -80,6 +97,27 @@ impl Bitboard {
     pub const fn shr(self, rhs: usize) -> Self {
         Self(self.0 >> rhs)
     }
+}
+
+impl Bitboard {
+    pub const FILE_A: Bitboard = Bitboard(0x0101010101010101u64);
+    pub const FILE_B: Bitboard = Self::FILE_A.shl(1);
+    pub const FILE_G: Bitboard = Self::FILE_A.shl(6);
+    pub const FILE_H: Bitboard = Self::FILE_A.shl(7);
+
+    pub const NOT_FILE_A: Bitboard = Self::FILE_A.not();
+    pub const NOT_FILE_H: Bitboard = Self::FILE_H.not();
+    pub const NOT_FILE_AB: Bitboard = (Self::FILE_A.bitor(Self::FILE_B)).not();
+    pub const NOT_FILE_GH: Bitboard = (Self::FILE_G.bitor(Self::FILE_H)).not();
+
+    pub const RANK_1: Bitboard = Bitboard(0x00000000000000FFu64);
+    pub const RANK_2: Bitboard = Self::RANK_1.shl(1 * 8);
+    pub const RANK_3: Bitboard = Self::RANK_1.shl(2 * 8);
+    pub const RANK_4: Bitboard = Self::RANK_1.shl(3 * 8);
+    pub const RANK_5: Bitboard = Self::RANK_1.shl(4 * 8);
+    pub const RANK_6: Bitboard = Self::RANK_1.shl(5 * 8);
+    pub const RANK_7: Bitboard = Self::RANK_1.shl(6 * 8);
+    pub const RANK_8: Bitboard = Self::RANK_1.shl(7 * 8);
 }
 
 impl BitOr for Bitboard {
@@ -134,21 +172,6 @@ impl Shr<usize> for Bitboard {
     }
 }
 
-pub const FILE_A: Bitboard = Bitboard(0x0101010101010101u64);
-pub const FILE_B: Bitboard = FILE_A.shl(1);
-pub const FILE_G: Bitboard = FILE_A.shl(6);
-pub const FILE_H: Bitboard = FILE_A.shl(7);
-
-pub const NOT_FILE_A: Bitboard = FILE_A.not();
-pub const NOT_FILE_H: Bitboard = FILE_H.not();
-pub const NOT_FILE_AB: Bitboard = (FILE_A.bitor(FILE_B)).not();
-pub const NOT_FILE_GH: Bitboard = (FILE_G.bitor(FILE_H)).not();
-
-pub const RANK_1: Bitboard = Bitboard(0x00000000000000FFu64);
-pub const RANK_2: Bitboard = RANK_1.shl(8);
-pub const RANK_7: Bitboard = RANK_1.shl(48);
-pub const RANK_8: Bitboard = RANK_1.shl(56);
-
 #[derive(Clone)]
 pub struct BitboardContainer {
     pieces: [[Bitboard; 6]; 2],
@@ -190,6 +213,47 @@ impl BitboardContainer {
     }
 }
 
+pub struct BitboardAllSquaresIterator {
+    index: u8,
+}
+
+impl BitboardAllSquaresIterator {
+    pub fn new() -> Self {
+        Self { index: 0 }
+    }
+}
+
+impl Iterator for BitboardAllSquaresIterator {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.index >= 64 {
+            None
+        } else {
+            let sq = self.index;
+            self.index += 1;
+            Some(sq)
+        }
+    }
+}
+pub struct BitboardSetSquaresIterator {
+    bitboard: Bitboard,
+}
+
+impl BitboardSetSquaresIterator {
+    pub fn new(bitboard: Bitboard) -> Self {
+        Self { bitboard }
+    }
+}
+
+impl Iterator for BitboardSetSquaresIterator {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.bitboard.pop_square()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::Square;
@@ -205,8 +269,8 @@ mod tests {
         bb.set(Square::H8);
         assert_eq!(bb.count(), 4);
 
-        assert_eq!(FILE_A.count(), 8);
+        assert_eq!(Bitboard::FILE_A.count(), 8);
 
-        assert_eq!(RANK_1.count(), 8);
+        assert_eq!(Bitboard::RANK_1.count(), 8);
     }
 }
