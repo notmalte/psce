@@ -27,11 +27,11 @@ use crate::{color::Color, piece::Piece};
 pub struct Bitboard(u64);
 
 impl Bitboard {
-    pub fn new(bb: u64) -> Self {
+    pub const fn new(bb: u64) -> Self {
         Self(bb)
     }
 
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self(0)
     }
 
@@ -96,6 +96,22 @@ impl Bitboard {
 
     pub const fn shr(self, rhs: usize) -> Self {
         Self(self.0 >> rhs)
+    }
+
+    pub const fn north(self) -> Self {
+        Self(self.0 << 8)
+    }
+
+    pub const fn east(self) -> Self {
+        Self(self.0 << 1)
+    }
+
+    pub const fn south(self) -> Self {
+        Self(self.0 >> 8)
+    }
+
+    pub const fn west(self) -> Self {
+        Self(self.0 >> 1)
     }
 }
 

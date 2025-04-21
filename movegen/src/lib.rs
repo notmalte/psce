@@ -1,15 +1,20 @@
 use core::{Bitboard, Color, Move, Position};
 
+mod king;
 mod pawn;
 
 pub struct MoveGen {
     pawn_attacks: [[Bitboard; 64]; 2],
+    // ...
+    king_attacks: [Bitboard; 64],
 }
 
 impl MoveGen {
     pub fn new() -> Self {
         Self {
             pawn_attacks: Self::generate_pawn_attacks(),
+            // ...
+            king_attacks: Self::generate_king_attacks(),
         }
     }
 
@@ -21,7 +26,7 @@ impl MoveGen {
         // self.generate_bishop_moves(position, &mut moves);
         // self.generate_rook_moves(position, &mut moves);
         // self.generate_queen_moves(position, &mut moves);
-        // self.generate_king_moves(position, &mut moves);
+        self.king_pseudo_legals(position, &mut moves);
 
         moves
     }

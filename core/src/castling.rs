@@ -1,5 +1,7 @@
 use std::{fmt::Display, str::FromStr};
 
+use crate::{Bitboard, Square};
+
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Castling(u8);
 
@@ -12,6 +14,20 @@ impl Castling {
     pub const BLACK_ALL: Self = Castling(0b1100);
     pub const NONE: Self = Castling(0b0000);
     pub const ALL: Self = Castling(0b1111);
+
+    pub const WHITE_KING_SIDE_SQUARES: Bitboard =
+        Square::to_bb(Square::F1).bitor(Square::to_bb(Square::G1));
+
+    pub const WHITE_QUEEN_SIDE_SQUARES: Bitboard = Square::to_bb(Square::D1)
+        .bitor(Square::to_bb(Square::C1))
+        .bitor(Square::to_bb(Square::B1));
+
+    pub const BLACK_KING_SIDE_SQUARES: Bitboard =
+        Square::to_bb(Square::F8).bitor(Square::to_bb(Square::G8));
+
+    pub const BLACK_QUEEN_SIDE_SQUARES: Bitboard = Square::to_bb(Square::D8)
+        .bitor(Square::to_bb(Square::C8))
+        .bitor(Square::to_bb(Square::B8));
 
     pub fn can(self, cstl: Self) -> bool {
         (self.0 & cstl.0) != 0

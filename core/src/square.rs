@@ -86,7 +86,7 @@ impl Square {
         (sq / 8, sq % 8)
     }
 
-    pub fn to_bb(sq: u8) -> Bitboard {
+    pub const fn to_bb(sq: u8) -> Bitboard {
         Bitboard::new(1 << sq)
     }
 
@@ -109,5 +109,21 @@ impl Square {
 
     pub fn to_str(sq: u8) -> String {
         format!("{}{}", (sq % 8 + b'a') as char, (sq / 8 + b'1') as char)
+    }
+
+    pub const fn north(sq: u8) -> u8 {
+        sq + 8
+    }
+
+    pub const fn east(sq: u8) -> u8 {
+        sq + 1
+    }
+
+    pub const fn south(sq: u8) -> u8 {
+        sq - 8
+    }
+
+    pub const fn west(sq: u8) -> u8 {
+        sq - 1
     }
 }

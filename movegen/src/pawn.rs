@@ -18,6 +18,10 @@ impl MoveGen {
         attacks
     }
 
+    pub(crate) fn pawn_attacks(&self, color: Color, square: u8) -> Bitboard {
+        self.pawn_attacks[color as usize][square as usize]
+    }
+
     pub(crate) fn pawn_pseudo_legals(&self, position: &Position, moves: &mut Vec<Move>) {
         let color = position.side_to_move();
 
@@ -89,16 +93,16 @@ impl MoveGen {
         }
 
         let east_attacks = match color {
-            Color::White => pawns << 7,
-            Color::Black => pawns >> 9,
-        } & Bitboard::NOT_FILE_H;
+            Color::White => pawns.north().east(),
+            Color::Black => pawns.south().east(),
+        } & Bitboard::NOT_FILE_A;
 
         let east_captures = east_attacks & opponent;
 
         for to_square in east_captures.squares() {
             let from_square = match color {
-                Color::White => to_square - 7,
-                Color::Black => to_square + 9,
+                Color::White => Square::west(Square::south(to_square)),
+                Color::Black => Square::west(Square::north(to_square)),
             };
 
             if promotion_rank.get(to_square) {
@@ -123,16 +127,16 @@ impl MoveGen {
         }
 
         let west_attacks = match color {
-            Color::White => pawns << 9,
-            Color::Black => pawns >> 7,
-        } & Bitboard::NOT_FILE_A;
+            Color::White => pawns.north().west(),
+            Color::Black => pawns.south().west(),
+        } & Bitboard::NOT_FILE_H;
 
         let west_captures = west_attacks & opponent;
 
         for to_square in west_captures.squares() {
             let from_square = match color {
-                Color::White => to_square - 9,
-                Color::Black => to_square + 7,
+                Color::White => Square::east(Square::south(to_square)),
+                Color::Black => Square::east(Square::north(to_square)),
             };
 
             if promotion_rank.get(to_square) {
@@ -159,8 +163,8 @@ impl MoveGen {
         if let Some(en_passant_square) = position.en_passant_square() {
             if east_attacks.get(en_passant_square) {
                 let from_square = match color {
-                    Color::White => en_passant_square - 7,
-                    Color::Black => en_passant_square + 9,
+                    Color::White => Square::west(Square::south(en_passant_square)),
+                    Color::Black => Square::west(Square::north(en_passant_square)),
                 };
 
                 moves.push(Move::new(
@@ -174,8 +178,8 @@ impl MoveGen {
 
             if west_attacks.get(en_passant_square) {
                 let from_square = match color {
-                    Color::White => en_passant_square - 9,
-                    Color::Black => en_passant_square + 7,
+                    Color::White => Square::east(Square::south(en_passant_square)),
+                    Color::Black => Square::east(Square::north(en_passant_square)),
                 };
 
                 moves.push(Move::new(
