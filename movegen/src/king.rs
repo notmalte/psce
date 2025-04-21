@@ -11,14 +11,14 @@ impl MoveGen {
 
             let mut mask = Bitboard::empty();
 
-            mask |= (bb >> 9) & Bitboard::NOT_FILE_H;
-            mask |= bb >> 8;
-            mask |= (bb >> 7) & Bitboard::NOT_FILE_A;
-            mask |= (bb >> 1) & Bitboard::NOT_FILE_H;
-            mask |= (bb << 1) & Bitboard::NOT_FILE_A;
-            mask |= (bb << 7) & Bitboard::NOT_FILE_H;
-            mask |= bb << 8;
-            mask |= (bb << 9) & Bitboard::NOT_FILE_A;
+            mask |= bb.north();
+            mask |= bb.north().east() & Bitboard::NOT_FILE_A;
+            mask |= bb.east() & Bitboard::NOT_FILE_A;
+            mask |= bb.south().east() & Bitboard::NOT_FILE_A;
+            mask |= bb.south();
+            mask |= bb.south().west() & Bitboard::NOT_FILE_H;
+            mask |= bb.west() & Bitboard::NOT_FILE_H;
+            mask |= bb.north().west() & Bitboard::NOT_FILE_H;
 
             attacks[square as usize] = mask;
         }

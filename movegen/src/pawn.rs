@@ -9,10 +9,12 @@ impl MoveGen {
         for square in Bitboard::all_squares() {
             let bb = Square::to_bb(square);
 
-            attacks[Color::White as usize][square as usize] =
-                ((bb << 7) & Bitboard::NOT_FILE_H) | ((bb << 9) & Bitboard::NOT_FILE_A);
-            attacks[Color::Black as usize][square as usize] =
-                ((bb >> 7) & Bitboard::NOT_FILE_A) | ((bb >> 9) & Bitboard::NOT_FILE_H);
+            attacks[Color::White as usize][square as usize] = (bb.north().east()
+                & Bitboard::NOT_FILE_A)
+                | (bb.north().west() & Bitboard::NOT_FILE_H);
+            attacks[Color::Black as usize][square as usize] = (bb.south().east()
+                & Bitboard::NOT_FILE_A)
+                | (bb.south().west() & Bitboard::NOT_FILE_H);
         }
 
         attacks
@@ -39,14 +41,14 @@ impl MoveGen {
 
         let single_pushes = unoccupied
             & match color {
-                Color::White => pawns << 8,
-                Color::Black => pawns >> 8,
+                Color::White => pawns.north(),
+                Color::Black => pawns.south(),
             };
 
         for to_square in single_pushes.squares() {
             let from_square = match color {
-                Color::White => to_square - 8,
-                Color::Black => to_square + 8,
+                Color::White => Square::south(to_square),
+                Color::Black => Square::north(to_square),
             };
 
             if promotion_rank.get(to_square) {
@@ -73,14 +75,14 @@ impl MoveGen {
         let double_pushes = unoccupied
             & double_push_rank
             & match color {
-                Color::White => single_pushes << 8,
-                Color::Black => single_pushes >> 8,
+                Color::White => single_pushes.north(),
+                Color::Black => single_pushes.south(),
             };
 
         for to_square in double_pushes.squares() {
             let from_square = match color {
-                Color::White => to_square - 16,
-                Color::Black => to_square + 16,
+                Color::White => Square::south(Square::south(to_square)),
+                Color::Black => Square::north(Square::north(to_square)),
             };
 
             moves.push(Move::new(
