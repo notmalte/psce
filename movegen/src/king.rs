@@ -1,36 +1,15 @@
 use core::{Bitboard, Castling, Color, Move, MoveFlags, Piece, Position, Square};
 
+use generated::KING_ATTACKS;
+
 use crate::MoveGen;
 
 impl MoveGen {
-    pub(crate) fn generate_king_attacks() -> [Bitboard; 64] {
-        let mut attacks = [Bitboard::empty(); 64];
-
-        for square in Bitboard::all_squares() {
-            let bb = Square::to_bb(square);
-
-            let mut mask = Bitboard::empty();
-
-            mask |= bb.north();
-            mask |= bb.north().east() & Bitboard::NOT_FILE_A;
-            mask |= bb.east() & Bitboard::NOT_FILE_A;
-            mask |= bb.south().east() & Bitboard::NOT_FILE_A;
-            mask |= bb.south();
-            mask |= bb.south().west() & Bitboard::NOT_FILE_H;
-            mask |= bb.west() & Bitboard::NOT_FILE_H;
-            mask |= bb.north().west() & Bitboard::NOT_FILE_H;
-
-            attacks[square as usize] = mask;
-        }
-
-        attacks
+    pub(crate) fn king_attacks(square: u8) -> Bitboard {
+        Bitboard::new(KING_ATTACKS[square as usize])
     }
 
-    pub(crate) fn king_attacks(&self, square: u8) -> Bitboard {
-        self.king_attacks[square as usize]
-    }
-
-    pub(crate) fn king_pseudo_legals(&self, position: &Position, moves: &mut Vec<Move>) {
+    pub(crate) fn king_pseudo_legals(position: &Position, moves: &mut Vec<Move>) {
         let color = position.side_to_move();
 
         let (king_side_castle_flag, queen_side_castle_flag) = match color {
@@ -43,7 +22,7 @@ impl MoveGen {
         let own = position.bitboards().color(color);
 
         for from_square in kings.squares() {
-            let attacks = self.king_attacks(from_square) & !own;
+            let attacks = Self::king_attacks(from_square) & !own;
 
             for to_square in attacks.squares() {
                 let capture = all.get(to_square);
@@ -75,8 +54,8 @@ impl MoveGen {
             };
 
             if (all & mask).is_empty()
-                && !self.is_attacked(position, e_square, !color)
-                && !self.is_attacked(position, f_square, !color)
+                && !Self::is_attacked(position, e_square, !color)
+                && !Self::is_attacked(position, f_square, !color)
             {
                 moves.push(Move::new(
                     e_square,
@@ -105,8 +84,8 @@ impl MoveGen {
             };
 
             if (all & mask).is_empty()
-                && !self.is_attacked(position, e_square, !color)
-                && !self.is_attacked(position, d_square, !color)
+                && !Self::is_attacked(position, e_square, !color)
+                && !Self::is_attacked(position, d_square, !color)
             {
                 moves.push(Move::new(
                     e_square,

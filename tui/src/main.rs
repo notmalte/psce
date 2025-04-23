@@ -3,8 +3,6 @@ use core::{Move, MoveFlags, Piece, Position, Square};
 use movegen::MoveGen;
 
 fn main() {
-    let mg = MoveGen::new();
-
     let mut position = Position::initial();
     println!("{}", position);
 
@@ -26,7 +24,7 @@ fn main() {
     ));
     println!("{}", position);
 
-    let moves = mg.pseudo_legals(&position);
+    let moves = MoveGen::pseudo_legals(&position);
 
     println!("{} pseudo-legal moves:", moves.len());
     for m in moves {

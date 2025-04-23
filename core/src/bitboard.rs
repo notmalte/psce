@@ -35,6 +35,10 @@ impl Bitboard {
         Self(0)
     }
 
+    pub const fn to_repr(self) -> u64 {
+        self.0
+    }
+
     pub fn all_squares() -> BitboardAllSquaresIterator {
         BitboardAllSquaresIterator::new()
     }

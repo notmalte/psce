@@ -7,10 +7,25 @@ name = "core"
 version = "0.0.0"
 
 [[package]]
+name = "generated"
+version = "0.0.0"
+dependencies = [
+ "generator",
+]
+
+[[package]]
+name = "generator"
+version = "0.0.0"
+dependencies = [
+ "core",
+]
+
+[[package]]
 name = "movegen"
 version = "0.0.0"
 dependencies = [
  "core",
+ "generated",
 ]
 
 [[package]]

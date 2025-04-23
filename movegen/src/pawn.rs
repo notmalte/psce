@@ -1,30 +1,15 @@
 use core::{Bitboard, Color, Move, MoveFlags, Piece, Position, Square};
 
+use generated::PAWN_ATTACKS;
+
 use crate::MoveGen;
 
 impl MoveGen {
-    pub(crate) fn generate_pawn_attacks() -> [[Bitboard; 64]; 2] {
-        let mut attacks = [[Bitboard::empty(); 64]; 2];
-
-        for square in Bitboard::all_squares() {
-            let bb = Square::to_bb(square);
-
-            attacks[Color::White as usize][square as usize] = (bb.north().east()
-                & Bitboard::NOT_FILE_A)
-                | (bb.north().west() & Bitboard::NOT_FILE_H);
-            attacks[Color::Black as usize][square as usize] = (bb.south().east()
-                & Bitboard::NOT_FILE_A)
-                | (bb.south().west() & Bitboard::NOT_FILE_H);
-        }
-
-        attacks
+    pub(crate) fn pawn_attacks(color: Color, square: u8) -> Bitboard {
+        Bitboard::new(PAWN_ATTACKS[square as usize + color as usize * 64])
     }
 
-    pub(crate) fn pawn_attacks(&self, color: Color, square: u8) -> Bitboard {
-        self.pawn_attacks[color as usize][square as usize]
-    }
-
-    pub(crate) fn pawn_pseudo_legals(&self, position: &Position, moves: &mut Vec<Move>) {
+    pub(crate) fn pawn_pseudo_legals(position: &Position, moves: &mut Vec<Move>) {
         let color = position.side_to_move();
 
         let (promotion_rank, double_push_rank) = match color {

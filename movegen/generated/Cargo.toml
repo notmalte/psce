@@ -1,0 +1,9 @@
+[package]
+name = "generated"
+version = "0.0.0"
+edition = "2024"
+
+[dependencies]
+
+[build-dependencies]
+generator = { path = "../generator" }

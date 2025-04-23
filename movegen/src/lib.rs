@@ -4,37 +4,23 @@ mod king;
 mod knight;
 mod pawn;
 
-pub struct MoveGen {
-    pawn_attacks: [[Bitboard; 64]; 2],
-    knight_attacks: [Bitboard; 64],
-    // ...
-    king_attacks: [Bitboard; 64],
-}
+pub struct MoveGen;
 
 impl MoveGen {
-    pub fn new() -> Self {
-        Self {
-            pawn_attacks: Self::generate_pawn_attacks(),
-            knight_attacks: Self::generate_knight_attacks(),
-            // ...
-            king_attacks: Self::generate_king_attacks(),
-        }
-    }
-
-    pub fn pseudo_legals(&self, position: &Position) -> Vec<Move> {
+    pub fn pseudo_legals(position: &Position) -> Vec<Move> {
         let mut moves = Vec::new();
 
-        self.pawn_pseudo_legals(position, &mut moves);
-        self.knight_pseudo_legals(position, &mut moves);
-        // self.generate_bishop_moves(position, &mut moves);
-        // self.generate_rook_moves(position, &mut moves);
-        // self.generate_queen_moves(position, &mut moves);
-        self.king_pseudo_legals(position, &mut moves);
+        Self::pawn_pseudo_legals(position, &mut moves);
+        Self::knight_pseudo_legals(position, &mut moves);
+        // Self::bishop_pseudo_legals(position, &mut moves);
+        // Self::rook_pseudo_legals(position, &mut moves);
+        // Self::queen_pseudo_legals(position, &mut moves);
+        Self::king_pseudo_legals(position, &mut moves);
 
         moves
     }
 
-    pub fn is_attacked(&self, position: &Position, square: u8, by_side: Color) -> bool {
+    pub fn is_attacked(position: &Position, square: u8, by_side: Color) -> bool {
         // TODO
 
         false
