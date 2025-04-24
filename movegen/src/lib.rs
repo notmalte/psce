@@ -2,6 +2,7 @@ use core::{Bitboard, Color, Move, Position};
 
 mod king;
 mod knight;
+mod magic;
 mod pawn;
 
 pub struct MoveGen;

@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 core = { path = "../../core" }
+fastrand = "2.3.0"

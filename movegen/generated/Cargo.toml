@@ -7,3 +7,4 @@ edition = "2024"
 
 [build-dependencies]
 generator = { path = "../generator" }
+core = { path = "../../core" }
