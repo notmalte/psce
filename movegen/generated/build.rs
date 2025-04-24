@@ -4,7 +4,8 @@ use std::{fmt::Display, fs::File};
 
 use core::Bitboard;
 use generator::{
-    generate_king_attacks, generate_knight_attacks, generate_pawn_attacks, generate_rook_magic_data,
+    generate_bishop_magic_data, generate_king_attacks, generate_knight_attacks,
+    generate_pawn_attacks, generate_rook_magic_data,
 };
 
 fn map_bitboards(bitboards: &[Bitboard]) -> Vec<u64> {
@@ -60,6 +61,7 @@ fn main() {
     let knight_attacks = generate_knight_attacks();
     let king_attacks = generate_king_attacks();
 
+    let bishop_magic_data = generate_bishop_magic_data();
     let rook_magic_data = generate_rook_magic_data();
 
     let ts_end = std::time::SystemTime::now();
@@ -85,6 +87,12 @@ fn main() {
     write_array(&mut f, "PAWN_ATTACKS", &map_bitboards(&pawn_attacks));
     write_array(&mut f, "KNIGHT_ATTACKS", &map_bitboards(&knight_attacks));
     write_array(&mut f, "KING_ATTACKS", &map_bitboards(&king_attacks));
+
+    write_array(&mut f, "BISHOP_MASKS", &bishop_magic_data.masks);
+    write_array(&mut f, "BISHOP_SHIFTS", &bishop_magic_data.shifts);
+    write_array(&mut f, "BISHOP_MAGICS", &bishop_magic_data.magics);
+    write_array(&mut f, "BISHOP_OFFSETS", &bishop_magic_data.offsets);
+    write_array(&mut f, "BISHOP_ATTACKS", &bishop_magic_data.attacks);
 
     write_array(&mut f, "ROOK_MASKS", &rook_magic_data.masks);
     write_array(&mut f, "ROOK_SHIFTS", &rook_magic_data.shifts);
