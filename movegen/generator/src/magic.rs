@@ -75,16 +75,19 @@ where
 
             let index = (occupancy.to_repr().wrapping_mul(magic) >> shift) as usize;
 
-            if let Some(used_attack) = used[index] {
-                if used_attack != attack {
-                    continue 'search;
-                }
-            } else {
-                used[index] = Some(attack);
+            if used[index].is_some() {
+                continue 'search;
             }
+
+            used[index] = Some(attack);
         }
 
-        return (magic, attacks);
+        let used_attacks = used
+            .iter()
+            .map(|attack| attack.expect("unreachable"))
+            .collect();
+
+        return (magic, used_attacks);
     }
 }
 
