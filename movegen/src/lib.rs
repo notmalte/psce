@@ -1,9 +1,12 @@
 use core::{Bitboard, Color, Move, Position};
 
+mod bishop;
 mod king;
 mod knight;
 mod magic;
 mod pawn;
+mod queen;
+mod rook;
 
 pub struct MoveGen;
 
@@ -13,9 +16,9 @@ impl MoveGen {
 
         Self::pawn_pseudo_legals(position, &mut moves);
         Self::knight_pseudo_legals(position, &mut moves);
-        // Self::bishop_pseudo_legals(position, &mut moves);
-        // Self::rook_pseudo_legals(position, &mut moves);
-        // Self::queen_pseudo_legals(position, &mut moves);
+        Self::bishop_pseudo_legals(position, &mut moves);
+        Self::rook_pseudo_legals(position, &mut moves);
+        Self::queen_pseudo_legals(position, &mut moves);
         Self::king_pseudo_legals(position, &mut moves);
 
         moves
