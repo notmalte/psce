@@ -7,6 +7,7 @@ use crate::{
 
 pub const FEN_INITIAL_POSITION: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
+#[derive(Clone)]
 pub struct Position {
     bitboards: BitboardContainer,
     side_to_move: Color,
@@ -310,6 +311,10 @@ impl Position {
 
         *self.bitboards.all_mut() =
             self.bitboards.color(Color::White) | self.bitboards.color(Color::Black);
+    }
+
+    pub fn king_square(&self, color: Color) -> Option<u8> {
+        self.bitboards.piece(color, Piece::King).last_square()
     }
 }
 

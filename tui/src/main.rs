@@ -7,8 +7,26 @@ fn main() {
     println!("{}", position);
 
     position.make_move(&Move::new(
-        Square::E2,
-        Square::E4,
+        Square::F2,
+        Square::F3,
+        Piece::Pawn,
+        None,
+        MoveFlags::NONE,
+    ));
+    println!("{}", position);
+
+    position.make_move(&Move::new(
+        Square::E7,
+        Square::E6,
+        Piece::Pawn,
+        None,
+        MoveFlags::NONE,
+    ));
+    println!("{}", position);
+
+    position.make_move(&Move::new(
+        Square::G2,
+        Square::G4,
         Piece::Pawn,
         None,
         MoveFlags::DOUBLE_PUSH,
@@ -16,17 +34,17 @@ fn main() {
     println!("{}", position);
 
     position.make_move(&Move::new(
-        Square::E7,
-        Square::E5,
-        Piece::Pawn,
+        Square::D8,
+        Square::H4,
+        Piece::Queen,
         None,
-        MoveFlags::DOUBLE_PUSH,
+        MoveFlags::NONE,
     ));
     println!("{}", position);
 
-    let moves = MoveGen::pseudo_legals(&position);
+    let moves = MoveGen::legals(&position);
 
-    println!("{} pseudo-legal moves:", moves.len());
+    println!("{} legal moves:", moves.len());
     for m in moves {
         println!("{}", m);
     }

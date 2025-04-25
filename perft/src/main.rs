@@ -1,4 +1,5 @@
-use core::{Piece, Position};
+use core::Position;
+use std::time::Instant;
 
 use movegen::MoveGen;
 
@@ -10,17 +11,13 @@ fn perft(pos: &mut Position, depth: u8) -> u64 {
     let mut nodes = 0;
     let moves = MoveGen::pseudo_legals(pos);
 
-    let side = pos.side_to_move();
+    let own_color = pos.side_to_move();
 
     for m in moves {
         let undo = pos.make_move(&m);
 
-        let king_square = pos
-            .bitboards()
-            .piece(side, Piece::King)
-            .last_square()
-            .unwrap();
-        let is_king_attacked = MoveGen::is_attacked(pos, king_square, side);
+        let king_square = pos.king_square(own_color).expect("should have a king");
+        let is_king_attacked = MoveGen::is_attacked(pos, king_square, pos.side_to_move());
 
         if !is_king_attacked {
             nodes += perft(pos, depth - 1);
@@ -35,7 +32,20 @@ fn perft(pos: &mut Position, depth: u8) -> u64 {
 fn main() {
     let mut position = Position::initial();
 
-    let depth = 3;
-    let nodes = perft(&mut position, depth);
-    println!("Perft({}) = {}", depth, nodes);
+    let depth = 5;
+
+    let start = Instant::now();
+
+    for d in 0..=depth {
+        let d_start = Instant::now();
+        let nodes = perft(&mut position, d);
+        println!(
+            "Perft({}) = {} ({:.2}ms)",
+            d,
+            nodes,
+            d_start.elapsed().as_millis()
+        );
+    }
+
+    println!("Total time: {:.2}ms", start.elapsed().as_millis());
 }

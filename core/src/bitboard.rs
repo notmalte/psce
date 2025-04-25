@@ -59,6 +59,10 @@ impl Bitboard {
         self.0 == 0
     }
 
+    pub fn is_not_empty(&self) -> bool {
+        !self.is_empty()
+    }
+
     pub fn last_square(&self) -> Option<u8> {
         if self.is_empty() {
             None
