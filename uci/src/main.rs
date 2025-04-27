@@ -7,7 +7,7 @@ fn main() {
 
         let parts = command.split_whitespace().collect::<Vec<_>>();
 
-        match parts.get(0) {
+        match parts.first() {
             Some(&"uci") => {
                 println!("id name psce");
                 println!("uciok");

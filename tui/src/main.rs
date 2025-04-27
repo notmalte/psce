@@ -1,51 +1,57 @@
-use core::{Move, MoveFlags, Piece, Position, Square};
+use core::Position;
+use std::io;
 
 use movegen::MoveGen;
+use search::find_best_move;
 
 fn main() {
     let mut position = Position::initial();
     println!("{}", position);
 
-    position.make_move(&Move::new(
-        Square::F2,
-        Square::F3,
-        Piece::Pawn,
-        None,
-        MoveFlags::NONE,
-    ));
-    println!("{}", position);
+    loop {
+        let legal_moves = MoveGen::legals(&position);
+        if legal_moves.is_empty() {
+            println!("Checkmate! {:?} wins!", !position.side_to_move());
+            break;
+        }
 
-    position.make_move(&Move::new(
-        Square::E7,
-        Square::E6,
-        Piece::Pawn,
-        None,
-        MoveFlags::NONE,
-    ));
-    println!("{}", position);
+        let mut selected = None;
 
-    position.make_move(&Move::new(
-        Square::G2,
-        Square::G4,
-        Piece::Pawn,
-        None,
-        MoveFlags::DOUBLE_PUSH,
-    ));
-    println!("{}", position);
+        loop {
+            println!("Enter move (e.g. e2e4):");
+            let mut input = String::new();
+            io::stdin().read_line(&mut input).unwrap();
 
-    position.make_move(&Move::new(
-        Square::D8,
-        Square::H4,
-        Piece::Queen,
-        None,
-        MoveFlags::NONE,
-    ));
-    println!("{}", position);
+            let trimmed = input.trim();
+            if trimmed == "q" || trimmed == "quit" {
+                break;
+            }
 
-    let moves = MoveGen::legals(&position);
+            let mv = legal_moves.iter().find(|m| m.to_string() == trimmed);
+            if let Some(mv) = mv {
+                selected = Some(mv);
+                break;
+            } else {
+                println!("Invalid move!");
+            }
+        }
 
-    println!("{} legal moves:", moves.len());
-    for m in moves {
-        println!("{}", m);
+        let Some(mv) = selected else {
+            println!("Bye!");
+            break;
+        };
+
+        position.make_move(mv);
+        println!("{}", position);
+
+        let Some(engine_move) = find_best_move(&position) else {
+            println!("Checkmate! {:?} wins!", !position.side_to_move());
+            break;
+        };
+
+        println!("Engine move: {}", engine_move);
+
+        position.make_move(&engine_move);
+        println!("{}", position);
     }
 }

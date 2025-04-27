@@ -45,11 +45,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "search"
+version = "0.0.0"
+dependencies = [
+ "core",
+ "fastrand",
+ "movegen",
+]
+
+[[package]]
 name = "tui"
 version = "0.0.0"
 dependencies = [
  "core",
  "movegen",
+ "search",
 ]
 
 [[package]]

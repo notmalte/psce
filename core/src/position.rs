@@ -350,7 +350,7 @@ impl Display for Position {
         writeln!(f, "    a b c d e f g h")?;
         writeln!(f)?;
 
-        writeln!(f, "Color: {:?}", self.side_to_move)?;
+        writeln!(f, "Side to move: {:?}", self.side_to_move)?;
         writeln!(f, "Castling: {}", self.castling)?;
         writeln!(
             f,

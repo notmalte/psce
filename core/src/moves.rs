@@ -1,6 +1,6 @@
 use std::{fmt::Display, ops::BitOr};
 
-use crate::{Square, piece::Piece};
+use crate::{Color, Square, piece::Piece};
 
 #[derive(Clone, Debug)]
 pub struct Move {
@@ -49,8 +49,12 @@ impl Display for Move {
             f,
             "{}{}{}",
             Square::to_str(self.from),
-            if self.flags.is_capture() { "x" } else { "" },
             Square::to_str(self.to),
+            if let Some(promotion) = self.promotion {
+                format!("{}", promotion.to_char(Color::Black))
+            } else {
+                "".to_string()
+            }
         )
     }
 }
