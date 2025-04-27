@@ -38,7 +38,7 @@ dependencies = [
 
 [[package]]
 name = "perft"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "core",
  "movegen",
@@ -46,8 +46,12 @@ dependencies = [
 
 [[package]]
 name = "tui"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "core",
  "movegen",
 ]
+
+[[package]]
+name = "uci"
+version = "0.0.0"
