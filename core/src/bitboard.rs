@@ -40,7 +40,7 @@ impl Bitboard {
     }
 
     pub fn all_squares() -> BitboardAllSquaresIterator {
-        BitboardAllSquaresIterator::new()
+        BitboardAllSquaresIterator::default()
     }
 
     pub fn get(&self, sq: u8) -> bool {
@@ -135,7 +135,7 @@ impl Bitboard {
     pub const NOT_FILE_GH: Bitboard = (Self::FILE_G.bitor(Self::FILE_H)).not();
 
     pub const RANK_1: Bitboard = Bitboard(0x00000000000000FFu64);
-    pub const RANK_2: Bitboard = Self::RANK_1.shl(1 * 8);
+    pub const RANK_2: Bitboard = Self::RANK_1.shl(8);
     pub const RANK_3: Bitboard = Self::RANK_1.shl(2 * 8);
     pub const RANK_4: Bitboard = Self::RANK_1.shl(3 * 8);
     pub const RANK_5: Bitboard = Self::RANK_1.shl(4 * 8);
@@ -237,14 +237,9 @@ impl BitboardContainer {
     }
 }
 
+#[derive(Default)]
 pub struct BitboardAllSquaresIterator {
     index: u8,
-}
-
-impl BitboardAllSquaresIterator {
-    pub fn new() -> Self {
-        Self { index: 0 }
-    }
 }
 
 impl Iterator for BitboardAllSquaresIterator {

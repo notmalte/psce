@@ -2,7 +2,7 @@ use core::Position;
 use std::io;
 
 use movegen::MoveGen;
-use search::find_best_move;
+use search::{evaluate_position, find_best_move};
 
 fn main() {
     let mut position = Position::initial();
@@ -43,6 +43,7 @@ fn main() {
 
         position.make_move(mv);
         println!("{}", position);
+        println!("Eval: {}", evaluate_position(&position));
 
         let Some(engine_move) = find_best_move(&position) else {
             println!("Checkmate! {:?} wins!", !position.side_to_move());
@@ -53,5 +54,6 @@ fn main() {
 
         position.make_move(&engine_move);
         println!("{}", position);
+        println!("Eval: {}", evaluate_position(&position));
     }
 }
