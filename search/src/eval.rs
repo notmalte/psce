@@ -1,5 +1,7 @@
 use core::{Color, Piece, Position};
 
+pub const CHECKMATE_SCORE: i32 = 1_000_000;
+
 pub fn evaluate_position(position: &Position) -> i32 {
     let mut score = 0;
 

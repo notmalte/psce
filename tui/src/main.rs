@@ -45,12 +45,14 @@ fn main() {
         println!("{}", position);
         println!("Eval: {}", evaluate_position(&position));
 
-        let Some(engine_move) = find_best_move(&position) else {
+        println!("Thinking...");
+
+        let Some((engine_eval, engine_move)) = find_best_move(&position) else {
             println!("Checkmate! {:?} wins!", !position.side_to_move());
             break;
         };
 
-        println!("Engine move: {}", engine_move);
+        println!("Engine move: {} ({})", engine_move, engine_eval);
 
         position.make_move(&engine_move);
         println!("{}", position);
