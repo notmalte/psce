@@ -126,4 +126,8 @@ impl Square {
     pub const fn west(sq: u8) -> u8 {
         sq - 1
     }
+
+    pub const fn mirror(sq: u8) -> u8 {
+        sq ^ 0b111000
+    }
 }
