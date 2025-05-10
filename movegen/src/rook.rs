@@ -1,6 +1,5 @@
-use core::{Bitboard, Move, MoveFlags, Piece, Position};
-
-use generated::{ROOK_ATTACKS, ROOK_MAGICS, ROOK_MASKS, ROOK_OFFSETS, ROOK_SHIFTS};
+use psce_core::{Bitboard, Move, MoveFlags, Piece, Position};
+use psce_movegen_generated::{ROOK_ATTACKS, ROOK_MAGICS, ROOK_MASKS, ROOK_OFFSETS, ROOK_SHIFTS};
 
 use crate::{MoveGen, magic::magic_index};
 

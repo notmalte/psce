@@ -1,4 +1,4 @@
-use core::Bitboard;
+use psce_core::Bitboard;
 
 #[derive(Debug)]
 pub struct MagicData {

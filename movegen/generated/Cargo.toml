@@ -1,10 +1,10 @@
 [package]
-name = "generated"
+name = "psce_movegen_generated"
 version = "0.0.0"
 edition = "2024"
 
 [dependencies]
 
 [build-dependencies]
-generator = { path = "../generator" }
-core = { path = "../../core" }
+psce_movegen_generator = { path = "../generator" }
+psce_core = { path = "../../core" }

@@ -1,8 +1,8 @@
-use core::Position;
 use std::io;
 
-use movegen::MoveGen;
-use search::{evaluate_position, find_best_move};
+use psce_core::Position;
+use psce_movegen::MoveGen;
+use psce_search::{evaluate_position, find_best_move};
 
 fn main() {
     let mut position = Position::initial();

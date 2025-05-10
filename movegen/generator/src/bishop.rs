@@ -1,4 +1,4 @@
-use core::{Bitboard, Square};
+use psce_core::{Bitboard, Square};
 
 use crate::magic::{MagicData, generate_magic_data};
 

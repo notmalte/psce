@@ -1,6 +1,5 @@
-use core::{Bitboard, Color, Move, MoveFlags, Piece, Position, Square};
-
-use generated::PAWN_ATTACKS;
+use psce_core::{Bitboard, Color, Move, MoveFlags, Piece, Position, Square};
+use psce_movegen_generated::PAWN_ATTACKS;
 
 use crate::MoveGen;
 

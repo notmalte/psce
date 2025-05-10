@@ -1,6 +1,5 @@
-use core::{Bitboard, Castling, Color, Move, MoveFlags, Piece, Position, Square};
-
-use generated::KING_ATTACKS;
+use psce_core::{Bitboard, Castling, Color, Move, MoveFlags, Piece, Position, Square};
+use psce_movegen_generated::KING_ATTACKS;
 
 use crate::MoveGen;
 

@@ -1,6 +1,5 @@
-use core::{Bitboard, Move, MoveFlags, Piece, Position};
-
-use generated::KNIGHT_ATTACKS;
+use psce_core::{Bitboard, Move, MoveFlags, Piece, Position};
+use psce_movegen_generated::KNIGHT_ATTACKS;
 
 use crate::MoveGen;
 

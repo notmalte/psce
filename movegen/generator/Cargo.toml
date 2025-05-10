@@ -1,8 +1,8 @@
 [package]
-name = "generator"
+name = "psce_movegen_generator"
 version = "0.0.0"
 edition = "2024"
 
 [dependencies]
-core = { path = "../../core" }
+psce_core = { path = "../../core" }
 fastrand = "2.3.0"

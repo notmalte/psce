@@ -1,9 +1,9 @@
 [package]
-name = "search"
+name = "psce_search"
 version = "0.0.0"
 edition = "2024"
 
 [dependencies]
-core = { path = "../core" }
-movegen = { path = "../movegen" }
+psce_core = { path = "../core" }
+psce_movegen = { path = "../movegen" }
 fastrand = "2.3.0"

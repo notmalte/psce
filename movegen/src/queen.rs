@@ -1,4 +1,4 @@
-use core::{Bitboard, Move, MoveFlags, Piece, Position};
+use psce_core::{Bitboard, Move, MoveFlags, Piece, Position};
 
 use crate::MoveGen;
 

@@ -1,4 +1,4 @@
-use core::{Color, Piece, Position, Square};
+use psce_core::{Color, Piece, Position, Square};
 
 pub const CHECKMATE_SCORE: i32 = 1_000_000;
 

@@ -1,7 +1,7 @@
-use core::Position;
 use std::time::Instant;
 
-use movegen::MoveGen;
+use psce_core::Position;
+use psce_movegen::MoveGen;
 
 fn perft(pos: &mut Position, depth: u8) -> u64 {
     if depth == 0 {

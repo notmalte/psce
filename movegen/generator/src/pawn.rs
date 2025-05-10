@@ -1,4 +1,4 @@
-use core::{Bitboard, Color, Square};
+use psce_core::{Bitboard, Color, Square};
 
 pub fn generate_pawn_attacks() -> [Bitboard; 128] {
     let mut attacks = [Bitboard::empty(); 128];

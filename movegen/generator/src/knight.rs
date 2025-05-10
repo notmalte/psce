@@ -1,4 +1,4 @@
-use core::{Bitboard, Square};
+use psce_core::{Bitboard, Square};
 
 pub fn generate_knight_attacks() -> [Bitboard; 64] {
     let mut attacks = [Bitboard::empty(); 64];

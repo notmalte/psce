@@ -2,8 +2,8 @@ use std::io::Write;
 use std::path::Path;
 use std::{fmt::Display, fs::File};
 
-use core::Bitboard;
-use generator::{
+use psce_core::Bitboard;
+use psce_movegen_generator::{
     generate_bishop_magic_data, generate_king_attacks, generate_knight_attacks,
     generate_pawn_attacks, generate_rook_magic_data,
 };

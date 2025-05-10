@@ -1,9 +1,9 @@
-use core::{Color, Move, Position};
-
-use eval::CHECKMATE_SCORE;
-use movegen::MoveGen;
+use psce_core::{Color, Move, Position};
+use psce_movegen::MoveGen;
 
 mod eval;
+
+use eval::CHECKMATE_SCORE;
 
 pub use eval::evaluate_position;
 

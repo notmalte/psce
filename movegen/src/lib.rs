@@ -1,4 +1,4 @@
-use core::{Color, Move, Piece, Position};
+use psce_core::{Color, Move, Piece, Position};
 
 mod bishop;
 mod king;

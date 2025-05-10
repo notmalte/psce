@@ -4,6 +4,6 @@ version = "0.0.0"
 edition = "2024"
 
 [dependencies]
-core = { path = "../core" }
-movegen = { path = "../movegen" }
-search = { path = "../search" }
+psce_core = { path = "../core" }
+psce_movegen = { path = "../movegen" }
+psce_search = { path = "../search" }

@@ -3,63 +3,63 @@
 version = 4
 
 [[package]]
-name = "core"
-version = "0.0.0"
-
-[[package]]
 name = "fastrand"
 version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "37909eebbb50d72f9059c3b6d82c0463f2ff062c9e95845c43a6c9c0355411be"
 
 [[package]]
-name = "generated"
-version = "0.0.0"
-dependencies = [
- "core",
- "generator",
-]
-
-[[package]]
-name = "generator"
-version = "0.0.0"
-dependencies = [
- "core",
- "fastrand",
-]
-
-[[package]]
-name = "movegen"
-version = "0.0.0"
-dependencies = [
- "core",
- "generated",
-]
-
-[[package]]
 name = "perft"
 version = "0.0.0"
 dependencies = [
- "core",
- "movegen",
+ "psce_core",
+ "psce_movegen",
 ]
 
 [[package]]
-name = "search"
+name = "psce_core"
+version = "0.0.0"
+
+[[package]]
+name = "psce_movegen"
 version = "0.0.0"
 dependencies = [
- "core",
+ "psce_core",
+ "psce_movegen_generated",
+]
+
+[[package]]
+name = "psce_movegen_generated"
+version = "0.0.0"
+dependencies = [
+ "psce_core",
+ "psce_movegen_generator",
+]
+
+[[package]]
+name = "psce_movegen_generator"
+version = "0.0.0"
+dependencies = [
  "fastrand",
- "movegen",
+ "psce_core",
+]
+
+[[package]]
+name = "psce_search"
+version = "0.0.0"
+dependencies = [
+ "fastrand",
+ "psce_core",
+ "psce_movegen",
 ]
 
 [[package]]
 name = "tui"
 version = "0.0.0"
 dependencies = [
- "core",
- "movegen",
- "search",
+ "psce_core",
+ "psce_movegen",
+ "psce_search",
 ]
 
 [[package]]

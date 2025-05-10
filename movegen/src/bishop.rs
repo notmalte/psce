@@ -1,6 +1,7 @@
-use core::{Bitboard, Move, MoveFlags, Piece, Position};
-
-use generated::{BISHOP_ATTACKS, BISHOP_MAGICS, BISHOP_MASKS, BISHOP_OFFSETS, BISHOP_SHIFTS};
+use psce_core::{Bitboard, Move, MoveFlags, Piece, Position};
+use psce_movegen_generated::{
+    BISHOP_ATTACKS, BISHOP_MAGICS, BISHOP_MASKS, BISHOP_OFFSETS, BISHOP_SHIFTS,
+};
 
 use crate::{MoveGen, magic::magic_index};
 
