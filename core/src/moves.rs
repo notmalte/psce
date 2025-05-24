@@ -2,7 +2,7 @@ use std::{fmt::Display, ops::BitOr};
 
 use crate::{Color, Square, piece::Piece};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Move {
     from: u8,
     to: u8,

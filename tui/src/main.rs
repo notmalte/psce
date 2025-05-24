@@ -2,7 +2,7 @@ use std::io;
 
 use psce_core::Position;
 use psce_movegen::MoveGen;
-use psce_search::{evaluate_position, find_best_move};
+use psce_search::{SearchResult, evaluate_position, find_best_move};
 
 fn main() {
     let mut position = Position::initial();
@@ -47,14 +47,27 @@ fn main() {
 
         println!("Thinking...");
 
-        let Some((engine_eval, engine_move)) = find_best_move(&position) else {
+        let Some(SearchResult {
+            score: engine_eval,
+            pv: engine_pv,
+        }) = find_best_move(&position)
+        else {
             println!("Checkmate! {:?} wins!", !position.side_to_move());
             break;
         };
 
-        println!("Engine move: {} ({})", engine_move, engine_eval);
+        println!(
+            "Engine move: {} ({}) -- expected PV: {}",
+            engine_pv.first().unwrap(),
+            engine_eval,
+            engine_pv
+                .iter()
+                .map(|mv| mv.to_string())
+                .collect::<Vec<_>>()
+                .join(" ")
+        );
 
-        position.make_move(&engine_move);
+        position.make_move(engine_pv.first().unwrap());
         println!("{}", position);
         println!("Eval: {}", evaluate_position(&position));
     }
