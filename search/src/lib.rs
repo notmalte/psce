@@ -9,16 +9,32 @@ use pv::PrincipalVariations;
 
 pub use eval::evaluate_position;
 
+pub struct SearchStats {
+    pub nodes: u64,
+    pub beta_cutoffs: u64,
+}
+
+impl SearchStats {
+    pub fn new() -> Self {
+        Self {
+            nodes: 0,
+            beta_cutoffs: 0,
+        }
+    }
+}
+
 pub struct SearchResult {
     pub score: i32,
     pub pv: Vec<Move>,
+    pub stats: SearchStats,
 }
 
 pub fn find_best_move(pos: &Position) -> Option<SearchResult> {
     let mut pos = pos.clone();
     let mut pvs = PrincipalVariations::new();
+    let mut stats = SearchStats::new();
 
-    let depth = 4;
+    let depth = 6;
 
     let score = negamax(
         &mut pos,
@@ -27,12 +43,13 @@ pub fn find_best_move(pos: &Position) -> Option<SearchResult> {
         -CHECKMATE_SCORE,
         CHECKMATE_SCORE,
         &mut pvs,
+        &mut stats,
     );
 
     let pv = pvs.get_pv(0);
 
     if !pv.is_empty() {
-        Some(SearchResult { score, pv })
+        Some(SearchResult { score, pv, stats })
     } else {
         None
     }
@@ -45,7 +62,10 @@ fn negamax(
     mut alpha: i32,
     beta: i32,
     pvs: &mut PrincipalVariations,
+    stats: &mut SearchStats,
 ) -> i32 {
+    stats.nodes += 1;
+
     pvs.clear_ply(ply as usize);
 
     if depth == 0 {
@@ -77,7 +97,7 @@ fn negamax(
 
         found_legal = true;
 
-        let score = -negamax(pos, depth - 1, ply + 1, -beta, -alpha, pvs);
+        let score = -negamax(pos, depth - 1, ply + 1, -beta, -alpha, pvs, stats);
         pos.undo_move(&mv, &undo);
 
         if score > best {
@@ -91,6 +111,7 @@ fn negamax(
         }
 
         if alpha >= beta {
+            stats.beta_cutoffs += 1;
             break;
         }
     }

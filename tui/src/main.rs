@@ -1,4 +1,4 @@
-use std::io;
+use std::{io, time::Instant};
 
 use psce_core::Position;
 use psce_movegen::MoveGen;
@@ -47,24 +47,46 @@ fn main() {
 
         println!("Thinking...");
 
+        let start = Instant::now();
+
         let Some(SearchResult {
             score: engine_eval,
             pv: engine_pv,
+            stats,
         }) = find_best_move(&position)
         else {
             println!("Checkmate! {:?} wins!", !position.side_to_move());
             break;
         };
 
+        let duration = start.elapsed();
+
         println!(
-            "Engine move: {} ({}) -- expected PV: {}",
+            "Engine move: {} ({})",
             engine_pv.first().unwrap(),
-            engine_eval,
+            engine_eval
+        );
+
+        println!(
+            " -- PV: {}",
             engine_pv
                 .iter()
                 .map(|mv| mv.to_string())
                 .collect::<Vec<_>>()
                 .join(" ")
+        );
+
+        println!(
+            " -- {} nodes in {}ms ({}nps)",
+            stats.nodes,
+            duration.as_millis(),
+            (stats.nodes as f64 / duration.as_secs_f64()) as u64
+        );
+
+        println!(
+            " -- {} beta cutoffs ({}%)",
+            stats.beta_cutoffs,
+            (stats.beta_cutoffs as f64 / stats.nodes as f64 * 100.0) as u64
         );
 
         position.make_move(engine_pv.first().unwrap());
