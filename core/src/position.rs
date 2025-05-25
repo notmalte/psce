@@ -316,6 +316,26 @@ impl Position {
     pub fn king_square(&self, color: Color) -> Option<u8> {
         self.bitboards.piece(color, Piece::King).last_square()
     }
+
+    pub fn victim_piece(&self, mv: &Move) -> Option<Piece> {
+        if mv.flags().is_en_passant() {
+            Some(Piece::Pawn)
+        } else if mv.flags().is_capture() {
+            for piece in Piece::ALL {
+                if self
+                    .bitboards
+                    .piece(!self.side_to_move(), piece)
+                    .get(mv.to())
+                {
+                    return Some(piece);
+                }
+            }
+
+            None
+        } else {
+            None
+        }
+    }
 }
 
 impl Display for Position {

@@ -1,4 +1,4 @@
-use psce_core::{Color, Move, Position};
+use psce_core::{Color, Move, Piece, Position};
 use psce_movegen::MoveGen;
 
 mod eval;
@@ -9,18 +9,10 @@ use pv::PrincipalVariations;
 
 pub use eval::evaluate_position;
 
+#[derive(Default)]
 pub struct SearchStats {
     pub nodes: u64,
     pub beta_cutoffs: u64,
-}
-
-impl SearchStats {
-    pub fn new() -> Self {
-        Self {
-            nodes: 0,
-            beta_cutoffs: 0,
-        }
-    }
 }
 
 pub struct SearchResult {
@@ -32,7 +24,7 @@ pub struct SearchResult {
 pub fn find_best_move(pos: &Position) -> Option<SearchResult> {
     let mut pos = pos.clone();
     let mut pvs = PrincipalVariations::new();
-    let mut stats = SearchStats::new();
+    let mut stats = SearchStats::default();
 
     let depth = 6;
 
@@ -82,7 +74,7 @@ fn negamax(
     let mut best = -CHECKMATE_SCORE;
     let mut found_legal = false;
 
-    let moves = MoveGen::pseudo_legals(pos);
+    let moves = sort_moves(MoveGen::pseudo_legals(pos), pos);
 
     for mv in moves {
         let undo = pos.make_move(&mv);
@@ -128,4 +120,30 @@ fn negamax(
     }
 
     best
+}
+
+fn sort_moves(mut moves: Vec<Move>, pos: &Position) -> Vec<Move> {
+    moves.sort_by_cached_key(|mv| {
+        if mv.flags().is_capture() {
+            let victim_value = piece_value(pos.victim_piece(mv).unwrap());
+            let attacker_value = piece_value(mv.piece());
+
+            (-victim_value, attacker_value)
+        } else {
+            (0, 0)
+        }
+    });
+
+    moves
+}
+
+fn piece_value(piece: Piece) -> i32 {
+    match piece {
+        Piece::Pawn => 1,
+        Piece::Knight => 2,
+        Piece::Bishop => 3,
+        Piece::Rook => 4,
+        Piece::Queen => 5,
+        Piece::King => 99,
+    }
 }
