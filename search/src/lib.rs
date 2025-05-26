@@ -9,24 +9,23 @@ use pv::PrincipalVariations;
 
 pub use eval::evaluate_position;
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct SearchStats {
     pub nodes: u64,
     pub beta_cutoffs: u64,
 }
 
+#[derive(Debug)]
 pub struct SearchResult {
     pub score: i32,
     pub pv: Vec<Move>,
     pub stats: SearchStats,
 }
 
-pub fn find_best_move(pos: &Position) -> Option<SearchResult> {
+pub fn find_best_move(pos: &Position, depth: u8) -> Option<SearchResult> {
     let mut pos = pos.clone();
     let mut pvs = PrincipalVariations::new();
     let mut stats = SearchStats::default();
-
-    let depth = 6;
 
     let score = negamax(
         &mut pos,

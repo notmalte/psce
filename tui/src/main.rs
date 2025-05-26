@@ -53,7 +53,7 @@ fn main() {
             score: engine_eval,
             pv: engine_pv,
             stats,
-        }) = find_best_move(&position)
+        }) = find_best_move(&position, 6)
         else {
             println!("Checkmate! {:?} wins!", !position.side_to_move());
             break;

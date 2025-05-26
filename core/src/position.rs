@@ -39,7 +39,7 @@ impl Position {
 
         let parts: Vec<_> = fen.split_whitespace().collect();
 
-        if parts.len() < 6 {
+        if parts.len() < 4 {
             return Err("FEN string too short".to_string());
         }
 
@@ -98,13 +98,21 @@ impl Position {
             s => Some(Square::from_str(s).ok_or("Invalid en passant square".to_string())?),
         };
 
-        position.halfmove_clock = parts[4]
-            .parse()
-            .map_err(|_| "Invalid halfmove clock".to_string())?;
+        position.halfmove_clock = if parts.len() > 4 {
+            parts[4]
+                .parse()
+                .map_err(|_| "Invalid halfmove clock".to_string())?
+        } else {
+            0
+        };
 
-        position.fullmove_number = parts[5]
-            .parse()
-            .map_err(|_| "Invalid fullmove number".to_string())?;
+        position.fullmove_number = if parts.len() > 5 {
+            parts[5]
+                .parse()
+                .map_err(|_| "Invalid fullmove number".to_string())?
+        } else {
+            1
+        };
 
         Ok(position)
     }

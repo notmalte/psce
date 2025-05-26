@@ -1,8 +1,10 @@
 [package]
-name = "perft"
+name = "bench"
 version = "0.0.0"
 edition = "2024"
 
 [dependencies]
+clap = { version = "4.5.38", features = ["derive"] }
 psce_core = { path = "../core" }
 psce_movegen = { path = "../movegen" }
+psce_search = { path = "../search" }
